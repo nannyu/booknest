@@ -1,0 +1,55 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Database (local SQLite)
+*.db
+*.db-shm
+*.db-wal
+data/
+
+# Test / Coverage
+coverage/
+.nyc_output/
+.vitest-cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/*
+!.vscode/settings.json.example
+!.vscode/extensions.json
+.idea/
+
+# Temp
+tmp/
+.tmp/
+*.tmp
+
+# pnpm
+.pnpm-debug.log
+
+# Local secrets
+.secrets/
+
+# Cached fixtures from recording scripts (real fixtures committed under fixtures/)
+.recorded/

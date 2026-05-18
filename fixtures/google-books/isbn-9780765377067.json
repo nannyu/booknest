@@ -1,0 +1,81 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 1,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "QxbFBAAAQBAJ",
+      "etag": "WdlTLXF6rng",
+      "selfLink": "https://www.googleapis.com/books/v1/volumes/QxbFBAAAQBAJ",
+      "volumeInfo": {
+        "title": "The Three-Body Problem",
+        "authors": [
+          "Cixin Liu"
+        ],
+        "publisher": "Macmillan",
+        "publishedDate": "2014-11-11",
+        "description": "Experience Cixin Liu's award-winning and bestselling masterpiece, The Three Body Problem. A secret military group sends signals into space in hopes of establishing contact with aliens--and succeeds. Picking up their signal is an alien civilization on the brink of destruction who now readies to invade Earth. News of the coming invasion divides humanity like never before. Some want to help the superior beings take over a world they see as corrupt. Others prepare to fight the invasion at all cost. The Three Body Problem begins a ground-breaking saga of enormous scope and vision. \"The War of the Worlds for the twenty-first century . . . Packed with a sense of wonder.\" --The Wall Street Journal The Remembrance of Earth's Past Trilogy The Three-Body Problem The Dark Forest Death's End Other Books Ball Lightning (forthcoming)",
+        "industryIdentifiers": [
+          {
+            "type": "ISBN_13",
+            "identifier": "9780765377067"
+          },
+          {
+            "type": "ISBN_10",
+            "identifier": "0765377063"
+          }
+        ],
+        "readingModes": {
+          "text": false,
+          "image": false
+        },
+        "pageCount": 400,
+        "printType": "BOOK",
+        "categories": [
+          "Fiction"
+        ],
+        "averageRating": 5,
+        "ratingsCount": 3,
+        "maturityRating": "NOT_MATURE",
+        "allowAnonLogging": false,
+        "contentVersion": "0.5.2.0.preview.0",
+        "panelizationSummary": {
+          "containsEpubBubbles": false,
+          "containsImageBubbles": false
+        },
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=QxbFBAAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=QxbFBAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en",
+        "previewLink": "http://books.google.com/books?id=QxbFBAAAQBAJ&printsec=frontcover&dq=isbn:9780765377067&hl=&cd=1&source=gbs_api",
+        "infoLink": "http://books.google.com/books?id=QxbFBAAAQBAJ&dq=isbn:9780765377067&hl=&source=gbs_api",
+        "canonicalVolumeLink": "https://books.google.com/books/about/The_Three_Body_Problem.html?hl=&id=QxbFBAAAQBAJ"
+      },
+      "saleInfo": {
+        "country": "US",
+        "saleability": "NOT_FOR_SALE",
+        "isEbook": false
+      },
+      "accessInfo": {
+        "country": "US",
+        "viewability": "PARTIAL",
+        "embeddable": true,
+        "publicDomain": false,
+        "textToSpeechPermission": "ALLOWED",
+        "epub": {
+          "isAvailable": false
+        },
+        "pdf": {
+          "isAvailable": false
+        },
+        "webReaderLink": "http://play.google.com/books/reader?id=QxbFBAAAQBAJ&hl=&source=gbs_api",
+        "accessViewStatus": "SAMPLE",
+        "quoteSharingAllowed": false
+      },
+      "searchInfo": {
+        "textSnippet": "A Hugo-Award winning tour de force near-future adventure with the scope of Dune and commercial action of Independence Day from China&#39;s most beloved science fiction writer"
+      }
+    }
+  ]
+}

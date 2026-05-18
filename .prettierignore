@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+coverage/
+*.db
+pnpm-lock.yaml
+*.tsbuildinfo
+fixtures/

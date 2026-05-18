@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookNest - 图书搜索</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .book-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .book-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">BookNest</h1>
+      <p class="text-gray-500">开源图书元数据聚合服务 · 支持 ISBN / 书名搜索</p>
+    </div>
+
+    <!-- Search -->
+    <div class="flex gap-2 mb-6">
+      <input id="q" type="text"
+        placeholder="输入 ISBN（如 9787536692930）或书名（如 三体）..."
+        class="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
+      <button id="btn" onclick="search()"
+        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors">
+        搜索
+      </button>
+    </div>
+
+    <!-- Status -->
+    <div id="loading" class="hidden text-center text-gray-500 py-8">搜索中...</div>
+    <div id="error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4"></div>
+    <div id="empty" class="hidden text-center text-gray-400 py-8">未找到结果</div>
+
+    <!-- Results -->
+    <div id="results" class="space-y-4"></div>
+
+    <!-- Footer -->
+    <div class="text-center text-gray-400 text-sm mt-12 pb-4">
+      数据来源：Open Library · Google Books
+    </div>
+  </div>
+
+  <script>
+    const qInput = document.getElementById('q');
+    const btn = document.getElementById('btn');
+    const loading = document.getElementById('loading');
+    const errorEl = document.getElementById('error');
+    const emptyEl = document.getElementById('empty');
+    const resultsEl = document.getElementById('results');
+
+    qInput.addEventListener('keypress', e => { if (e.key === 'Enter') search(); });
+
+    async function search() {
+      const q = qInput.value.trim();
+      if (!q) return;
+
+      setState('loading');
+
+      try {
+        const res = await fetch('/api/books/search?q=' + encodeURIComponent(q) + '&limit=10');
+        const data = await res.json();
+
+        if (!res.ok || data.error) {
+          throw new Error((data.error && data.error.message) || '请求失败');
+        }
+
+        const books = data.results || [];
+        if (books.length === 0) {
+          setState('empty');
+          return;
+        }
+
+        renderResults(books);
+        setState('results');
+      } catch (err) {
+        errorEl.textContent = err.message;
+        setState('error');
+      }
+    }
+
+    function setState(state) {
+      loading.classList.toggle('hidden', state !== 'loading');
+      errorEl.classList.toggle('hidden', state !== 'error');
+      emptyEl.classList.toggle('hidden', state !== 'empty');
+      resultsEl.classList.toggle('hidden', state !== 'results');
+      btn.disabled = state === 'loading';
+      btn.textContent = state === 'loading' ? '搜索中...' : '搜索';
+    }
+
+    function renderResults(books) {
+      resultsEl.innerHTML = books.map(book => {
+        const cover = book.coverUrl
+          ? `<img src="${escapeHtml(book.coverUrl)}" class="w-24 h-36 object-cover rounded shadow-sm flex-shrink-0" alt="" loading="lazy">`
+          : `<div class="w-24 h-36 bg-gray-200 rounded shadow-sm flex-shrink-0 flex items-center justify-center text-gray-400 text-xs">无封面</div>`;
+
+        const authors = (book.authors || []).map(a => escapeHtml(a.name)).join('、') || '未知作者';
+        const meta = [
+          book.publisher ? escapeHtml(book.publisher) : null,
+          book.publishedDate,
+          book.language ? '语言: ' + book.language : null,
+          book.pageCount ? book.pageCount + ' 页' : null,
+        ].filter(Boolean).join(' · ');
+
+        const isbns = [
+          book.isbn13 ? 'ISBN-13: ' + book.isbn13 : null,
+          book.isbn10 ? 'ISBN-10: ' + book.isbn10 : null,
+        ].filter(Boolean).join(' · ');
+
+        const confidenceClass = book.confidence > 80 ? 'text-green-600' : book.confidence > 50 ? 'text-yellow-600' : 'text-gray-400';
+        const confidenceLabel = [];
+        if (book.confidence != null) confidenceLabel.push('置信度 ' + book.confidence + '%');
+        if (book.recommended) confidenceLabel.push('推荐');
+        if (book.needsReview) confidenceLabel.push('需审核');
+
+        const sourceNames = { google_books: 'Google Books', open_library: 'Open Library' };
+        const sourceTags = (book.sources || []).map(s =>
+          `<span class="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-100">${sourceNames[s.name] || s.name}</span>`
+        ).join('');
+
+        return `<div class="book-card bg-white rounded-lg shadow p-4 flex gap-4">
+          ${cover}
+          <div class="flex-1 min-w-0">
+            <h2 class="text-lg font-bold text-gray-900 truncate">${escapeHtml(book.title)}</h2>
+            ${book.subtitle ? `<p class="text-gray-600 text-sm truncate">${escapeHtml(book.subtitle)}</p>` : ''}
+            <p class="text-gray-700 text-sm mt-1">${authors}</p>
+            ${meta ? `<p class="text-gray-500 text-xs mt-1">${meta}</p>` : ''}
+            ${isbns ? `<p class="text-gray-400 text-xs mt-1 font-mono">${isbns}</p>` : ''}
+            <div class="flex items-center gap-2 mt-2 flex-wrap">
+              ${sourceTags}
+            </div>
+            ${confidenceLabel.length ? `<p class="text-xs mt-2 ${confidenceClass}">${confidenceLabel.join(' · ')}</p>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      const div = document.createElement('div');
+      div.textContent = String(s);
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

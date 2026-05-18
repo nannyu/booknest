@@ -1,0 +1,35 @@
+{
+  "name": "@booknest/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/server.ts",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:studio": "drizzle-kit studio --config=drizzle.config.ts"
+  },
+  "dependencies": {
+    "@booknest/shared": "workspace:*",
+    "@hono/node-server": "^1.13.7",
+    "better-sqlite3": "^11.5.0",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.36.4",
+    "hono": "^4.6.13",
+    "nanoid": "^5.0.9",
+    "p-limit": "^6.1.0",
+    "pino": "^9.5.0",
+    "pino-http": "^10.3.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "drizzle-kit": "^0.28.1",
+    "msw": "^2.6.6",
+    "pino-pretty": "^13.0.0",
+    "tsx": "^4.19.2"
+  }
+}

@@ -1,0 +1,39 @@
+# 复制源码进镜像时排除这些
+**/node_modules
+**/dist
+**/.turbo
+**/coverage
+
+# 本地状态 / 个人配置
+.env
+.env.*
+!.env.example
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# 临时/交接文档
+WIP.md
+
+# Git
+.git/
+.gitignore
+
+# CI/CD 工件
+.github/
+
+# 测试
+fixtures/
+**/*.test.ts
+
+# 文档
+docs/
+*.md
+!CLAUDE.md

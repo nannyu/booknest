@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: booknest:0.1.0
+    container_name: booknest
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/app/data/booknest.db
+      PORT: 3000
+      APP_USER_AGENT: ${APP_USER_AGENT:-BookNest/0.1 (+https://github.com/booknest/booknest)}
+      APP_CONTACT_EMAIL: ${APP_CONTACT_EMAIL:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ENABLE_OPEN_LIBRARY: ${ENABLE_OPEN_LIBRARY:-true}
+      ENABLE_GOOGLE_BOOKS: ${ENABLE_GOOGLE_BOOKS:-true}
+      GOOGLE_BOOKS_API_KEY: ${GOOGLE_BOOKS_API_KEY:-}
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s

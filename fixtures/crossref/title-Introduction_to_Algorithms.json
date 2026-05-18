@@ -1,0 +1,999 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 1222810,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              3,
+              28
+            ]
+          ],
+          "date-time": "2025-03-28T01:33:57Z",
+          "timestamp": 1743125637776,
+          "version": "3.40.3"
+        },
+        "publisher-location": "New York, NY",
+        "reference-count": 0,
+        "publisher": "Springer New York",
+        "isbn-type": [
+          {
+            "type": "print",
+            "value": "9781461488057"
+          },
+          {
+            "type": "electronic",
+            "value": "9781461488064"
+          }
+        ],
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2013,
+                  1,
+                  1
+                ]
+              ],
+              "date-time": "2013-01-01T00:00:00Z",
+              "timestamp": 1356998400000
+            },
+            "content-version": "tdm",
+            "delay-in-days": 0,
+            "URL": "https://www.springernature.com/gp/researchers/text-and-data-mining"
+          },
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2013,
+                  1,
+                  1
+                ]
+              ],
+              "date-time": "2013-01-01T00:00:00Z",
+              "timestamp": 1356998400000
+            },
+            "content-version": "vor",
+            "delay-in-days": 0,
+            "URL": "https://www.springernature.com/gp/researchers/text-and-data-mining"
+          }
+        ],
+        "content-domain": {
+          "domain": [
+            "link.springer.com"
+          ],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2013
+            ]
+          ]
+        },
+        "DOI": "10.1007/978-1-4614-8806-4_46",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2013,
+              12,
+              4
+            ]
+          ],
+          "date-time": "2013-12-04T12:58:33Z",
+          "timestamp": 1386161913000
+        },
+        "page": "597-598",
+        "update-policy": "https://doi.org/10.1007/springer_crossmark_policy",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Algorithms: Introduction"
+        ],
+        "prefix": "10.1007",
+        "author": [
+          {
+            "given": "Remco",
+            "family": "Chang",
+            "sequence": "first",
+            "affiliation": []
+          },
+          {
+            "given": "Caroline",
+            "family": "Ziemkiewicz",
+            "sequence": "additional",
+            "affiliation": []
+          }
+        ],
+        "member": "297",
+        "published-online": {
+          "date-parts": [
+            [
+              2013,
+              11,
+              20
+            ]
+          ]
+        },
+        "container-title": [
+          "Handbook of Human Computation"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "https://link.springer.com/content/pdf/10.1007/978-1-4614-8806-4_46",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              2,
+              17
+            ]
+          ],
+          "date-time": "2023-02-17T17:52:11Z",
+          "timestamp": 1676656331000
+        },
+        "score": 17.844215,
+        "resource": {
+          "primary": {
+            "URL": "https://link.springer.com/10.1007/978-1-4614-8806-4_46"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2013
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781461488057",
+          "9781461488064"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.1007/978-1-4614-8806-4_46",
+        "published": {
+          "date-parts": [
+            [
+              2013
+            ]
+          ]
+        },
+        "assertion": [
+          {
+            "value": "20 November 2013",
+            "order": 1,
+            "name": "first_online",
+            "label": "First Online",
+            "group": {
+              "name": "ChapterHistory",
+              "label": "Chapter History"
+            }
+          }
+        ]
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              9,
+              11
+            ]
+          ],
+          "date-time": "2024-09-11T18:58:27Z",
+          "timestamp": 1726081107219
+        },
+        "publisher-location": "Cham",
+        "reference-count": 2,
+        "publisher": "Springer International Publishing",
+        "isbn-type": [
+          {
+            "type": "print",
+            "value": "9783030368258"
+          },
+          {
+            "type": "electronic",
+            "value": "9783030368265"
+          }
+        ],
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2020,
+                  1,
+                  1
+                ]
+              ],
+              "date-time": "2020-01-01T00:00:00Z",
+              "timestamp": 1577836800000
+            },
+            "content-version": "tdm",
+            "delay-in-days": 0,
+            "URL": "http://www.springer.com/tdm"
+          }
+        ],
+        "content-domain": {
+          "domain": [
+            "link.springer.com"
+          ],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2020
+            ]
+          ]
+        },
+        "DOI": "10.1007/978-3-030-36826-5_4",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2020,
+              4,
+              22
+            ]
+          ],
+          "date-time": "2020-04-22T11:02:49Z",
+          "timestamp": 1587553369000
+        },
+        "page": "49-57",
+        "update-policy": "http://dx.doi.org/10.1007/springer_crossmark_policy",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Introduction to Algorithms"
+        ],
+        "prefix": "10.1007",
+        "author": [
+          {
+            "given": "Josh",
+            "family": "Cutler",
+            "sequence": "first",
+            "affiliation": []
+          },
+          {
+            "given": "Matt",
+            "family": "Dickenson",
+            "sequence": "additional",
+            "affiliation": []
+          }
+        ],
+        "member": "297",
+        "published-online": {
+          "date-parts": [
+            [
+              2020,
+              4,
+              23
+            ]
+          ]
+        },
+        "reference": [
+          {
+            "key": "4_CR1",
+            "volume-title": "Introduction to algorithms",
+            "author": "T H Cormen",
+            "year": "2001",
+            "unstructured": "Cormen, T. H., Leiserson, C. E., Rivest, R. L., & Stein, C. (2001). Introduction to algorithms. Cambridge: MIT Press."
+          },
+          {
+            "key": "4_CR2",
+            "volume-title": "Automate this: How algorithms took over our markets, our jobs, and the world",
+            "author": "C Steiner",
+            "year": "2013",
+            "unstructured": "Steiner, C. (2013). Automate this: How algorithms took over our markets, our jobs, and the world. New York: Portfolio."
+          }
+        ],
+        "container-title": [
+          "Textbooks on Political Analysis",
+          "Computational Frameworks for Political and Social Research with Python"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "http://link.springer.com/content/pdf/10.1007/978-3-030-36826-5_4",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2020,
+              4,
+              22
+            ]
+          ],
+          "date-time": "2020-04-22T11:05:54Z",
+          "timestamp": 1587553554000
+        },
+        "score": 16.952333,
+        "resource": {
+          "primary": {
+            "URL": "http://link.springer.com/10.1007/978-3-030-36826-5_4"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2020
+            ]
+          ]
+        },
+        "ISBN": [
+          "9783030368258",
+          "9783030368265"
+        ],
+        "references-count": 2,
+        "URL": "https://doi.org/10.1007/978-3-030-36826-5_4",
+        "ISSN": [
+          "2522-0373",
+          "2522-0381"
+        ],
+        "issn-type": [
+          {
+            "type": "print",
+            "value": "2522-0373"
+          },
+          {
+            "type": "electronic",
+            "value": "2522-0381"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2020
+            ]
+          ]
+        },
+        "assertion": [
+          {
+            "value": "23 April 2020",
+            "order": 1,
+            "name": "first_online",
+            "label": "First Online",
+            "group": {
+              "name": "ChapterHistory",
+              "label": "Chapter History"
+            }
+          }
+        ]
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2023,
+              1,
+              19
+            ]
+          ],
+          "date-time": "2023-01-19T05:59:52Z",
+          "timestamp": 1674107992680
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press (OUP)",
+        "issue": "4",
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  1997,
+                  12,
+                  1
+                ]
+              ],
+              "date-time": "1997-12-01T00:00:00Z",
+              "timestamp": 880934400000
+            },
+            "content-version": "vor",
+            "delay-in-days": 0,
+            "URL": "https://academic.oup.com/journals/pages/open_access/funder_policies/chorus/standard_publication_model"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              1997,
+              12,
+              1
+            ]
+          ]
+        },
+        "DOI": "10.1111/1467-9876.00087",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2002,
+              7,
+              27
+            ]
+          ],
+          "date-time": "2002-07-27T08:56:31Z",
+          "timestamp": 1027760191000
+        },
+        "page": "513-513",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Algorithms Section—Introduction"
+        ],
+        "prefix": "10.1093",
+        "volume": "46",
+        "member": "286",
+        "published-online": {
+          "date-parts": [
+            [
+              2008,
+              6,
+              28
+            ]
+          ]
+        },
+        "container-title": [
+          "Journal of the Royal Statistical Society Series C: Applied Statistics"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "https://api.wiley.com/onlinelibrary/tdm/v1/articles/10.1111%2F1467-9876.00087",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://onlinelibrary.wiley.com/doi/pdf/10.1111/1467-9876.00087",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://academic.oup.com/jrsssc/article-pdf/46/4/513/48750238/jrsssc_46_4_513.pdf",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "syndication"
+          },
+          {
+            "URL": "https://academic.oup.com/jrsssc/article-pdf/46/4/513/48750238/jrsssc_46_4_513.pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              1,
+              18
+            ]
+          ],
+          "date-time": "2023-01-18T07:47:04Z",
+          "timestamp": 1674028024000
+        },
+        "score": 16.947477,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/jrsssc/article/46/4/513/6990571"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              1997,
+              12,
+              1
+            ]
+          ]
+        },
+        "references-count": 0,
+        "journal-issue": {
+          "issue": "4",
+          "published-online": {
+            "date-parts": [
+              [
+                2008,
+                6,
+                28
+              ]
+            ]
+          },
+          "published-print": {
+            "date-parts": [
+              [
+                1997,
+                12,
+                1
+              ]
+            ]
+          }
+        },
+        "URL": "https://doi.org/10.1111/1467-9876.00087",
+        "ISSN": [
+          "0035-9254",
+          "1467-9876"
+        ],
+        "issn-type": [
+          {
+            "value": "0035-9254",
+            "type": "print"
+          },
+          {
+            "value": "1467-9876",
+            "type": "electronic"
+          }
+        ],
+        "published-other": {
+          "date-parts": [
+            [
+              1997,
+              12
+            ]
+          ]
+        },
+        "published": {
+          "date-parts": [
+            [
+              1997,
+              12,
+              1
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              11,
+              10
+            ]
+          ],
+          "date-time": "2025-11-10T03:49:41Z",
+          "timestamp": 1762746581640
+        },
+        "reference-count": 29,
+        "publisher": "Elsevier",
+        "isbn-type": [
+          {
+            "value": "9780124167438",
+            "type": "print"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2014
+            ]
+          ]
+        },
+        "DOI": "10.1016/b978-0-12-416743-8.00001-4",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2014,
+              2,
+              22
+            ]
+          ],
+          "date-time": "2014-02-22T20:32:21Z",
+          "timestamp": 1393101141000
+        },
+        "page": "1-21",
+        "source": "Crossref",
+        "is-referenced-by-count": 39,
+        "title": [
+          "Introduction to Algorithms"
+        ],
+        "prefix": "10.1016",
+        "author": [
+          {
+            "given": "Xin-She",
+            "family": "Yang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "78",
+        "reference": [
+          {
+            "issue": "2",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0005",
+            "doi-asserted-by": "crossref",
+            "first-page": "121",
+            "DOI": "10.1007/s00453-008-9244-5",
+            "article-title": "Continuous lunches are free plus the design of optimal optimization algorithms",
+            "volume": "57",
+            "author": "Auger",
+            "year": "2010",
+            "journal-title": "Algorithmica"
+          },
+          {
+            "issue": "2",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0010",
+            "first-page": "2506",
+            "article-title": "Some multiobjective optimizers are better than others",
+            "volume": "4",
+            "author": "Corne",
+            "year": "2003",
+            "journal-title": "Evol Comput"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0015",
+            "series-title": "The essential turing",
+            "author": "Copeland",
+            "year": "2004"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0020",
+            "unstructured": "De Jong K. An analysis of the behavior of a class of genetic adaptive systems. Ph.D. thesis, University of Michigan, Ann Arbor, MI, USA; 1975."
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0025",
+            "unstructured": "Dorigo M. Optimization, learning and natural algorithms. Ph.D. thesis, Politecnico di Milano, Italy; 1992."
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0030",
+            "series-title": "Artificial intelligence through simulated evolution",
+            "author": "Fogel",
+            "year": "1966"
+          },
+          {
+            "issue": "2",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0035",
+            "doi-asserted-by": "crossref",
+            "first-page": "60",
+            "DOI": "10.1177/003754970107600201",
+            "article-title": "A new heuristic optimization: harmony search",
+            "volume": "76",
+            "author": "Geem",
+            "year": "2001",
+            "journal-title": "Simulation"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0040",
+            "series-title": "Tabu search",
+            "author": "Glover",
+            "year": "1997"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0045",
+            "series-title": "Adaptation in natural and artificial systems",
+            "author": "Holland",
+            "year": "1975"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0050",
+            "series-title": "Heuristics",
+            "author": "Judea",
+            "year": "1984"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0055",
+            "unstructured": "Karaboga D. An idea based on honeybee swarm for numerical optimization. Technical Report, Erciyes University, Turkey; 2005."
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0060",
+            "series-title": "Proceedings of the IEEE International Conference on Neural Networks, Piscataway, NJ, USA",
+            "first-page": "1942",
+            "article-title": "Particle swarm optimization",
+            "author": "Kennedy",
+            "year": "1995"
+          },
+          {
+            "issue": "4598",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0065",
+            "doi-asserted-by": "crossref",
+            "first-page": "671",
+            "DOI": "10.1126/science.220.4598.671",
+            "article-title": "Optimization by simulated annealing",
+            "volume": "220",
+            "author": "Kirkpatrick",
+            "year": "1983",
+            "journal-title": "Science"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0070",
+            "series-title": "Genetic programming: on the programming of computers by means of natural selection",
+            "author": "Koza",
+            "year": "1992"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0075",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Marshall JA, Hinton TG. Beyond no free lunch: realistic algorithms for arbitrary problem classes. WCCI 2010 IEEE world congress on computational intelligence, Barcelona, Spain, July 18–23; 2010. pp. 1319–1324.",
+            "DOI": "10.1109/CEC.2010.5586389"
+          },
+          {
+            "issue": "3",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0080",
+            "doi-asserted-by": "crossref",
+            "first-page": "223",
+            "DOI": "10.1177/105971230401200308",
+            "article-title": "On honeybees and dynamic server allocation in Internet hosting centers",
+            "volume": "12",
+            "author": "Nakrani",
+            "year": "2004",
+            "journal-title": "Adapt Behav"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0085",
+            "unstructured": "Pham DT, Ghanbarzadeh A, Koc E, Otri S, Rahim S, Zaidi M. The bees algorithm. Technical Note, Manufacturing Engineering Center, Cardiff University, Cardiff, UK; 2005."
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0090",
+            "series-title": "Handbook of discrete optimization",
+            "first-page": "1",
+            "article-title": "On the history of combinatorial optimization (till 1960)",
+            "author": "Schrijver",
+            "year": "2005"
+          },
+          {
+            "issue": "1",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0095",
+            "doi-asserted-by": "crossref",
+            "first-page": "77",
+            "DOI": "10.1016/0893-9659(91)90080-F",
+            "article-title": "Turing computability with neural nets",
+            "volume": "4",
+            "author": "Siegelmann",
+            "year": "1991",
+            "journal-title": "Appl Math Lett"
+          },
+          {
+            "issue": "4",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0100",
+            "doi-asserted-by": "crossref",
+            "first-page": "341",
+            "DOI": "10.1023/A:1008202821328",
+            "article-title": "Differential evolution: a simple and efficient heuristic for global optimization over continuous spaces",
+            "volume": "11",
+            "author": "Storn",
+            "year": "1997",
+            "journal-title": "J Global Optim"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0105",
+            "unstructured": "Turing AM. Intelligent machinery. National Physical Laboratory, UK, Technical Report; 1948."
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0110",
+            "series-title": "The nature of statistical learning theory",
+            "author": "Vapnik",
+            "year": "1995"
+          },
+          {
+            "issue": "1",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0115",
+            "doi-asserted-by": "crossref",
+            "first-page": "67",
+            "DOI": "10.1109/4235.585893",
+            "article-title": "No free lunch theorems for optimization",
+            "volume": "1",
+            "author": "Wolpert",
+            "year": "1997",
+            "journal-title": "IEEE Trans Evol Comput"
+          },
+          {
+            "issue": "6",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0120",
+            "doi-asserted-by": "crossref",
+            "first-page": "721",
+            "DOI": "10.1109/TEVC.2005.856205",
+            "article-title": "Coevolutionary free lunches",
+            "volume": "9",
+            "author": "Wolpert",
+            "year": "2005",
+            "journal-title": "IEEE Trans Evol Comput"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0125",
+            "series-title": "Nature-inspired metaheuristic algorithms",
+            "author": "Yang",
+            "year": "2008"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0130",
+            "series-title": "Proceedings of fifth symposium on stochastic algorithms, foundations and applications, SAGA 2009",
+            "first-page": "169",
+            "article-title": "Firefly algorithms for multimodal optimization",
+            "volume": "vol. 5792",
+            "author": "Yang",
+            "year": "2009"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0135",
+            "series-title": "Proceedings of world congress on nature & biologically inspired computing (NaBic 2009)",
+            "first-page": "210",
+            "article-title": "Cuckoo search via Lévy flights",
+            "author": "Yang",
+            "year": "2009"
+          },
+          {
+            "issue": "4",
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0140",
+            "doi-asserted-by": "crossref",
+            "first-page": "330",
+            "DOI": "10.1504/IJMMNO.2010.035430",
+            "article-title": "Engineering optimization by cuckoo search",
+            "volume": "1",
+            "author": "Yang",
+            "year": "2010",
+            "journal-title": "Int J Math Modelling Num Optim"
+          },
+          {
+            "key": "10.1016/B978-0-12-416743-8.00001-4_b0145",
+            "first-page": "65",
+            "article-title": "A new metaheuristic bat-inspired algorithm",
+            "volume": "vol. SCI 284",
+            "author": "Yang",
+            "year": "2010"
+          }
+        ],
+        "container-title": [
+          "Nature-Inspired Optimization Algorithms"
+        ],
+        "language": "en",
+        "deposited": {
+          "date-parts": [
+            [
+              2019,
+              8,
+              7
+            ]
+          ],
+          "date-time": "2019-08-07T22:05:13Z",
+          "timestamp": 1565215513000
+        },
+        "score": 16.947477,
+        "resource": {
+          "primary": {
+            "URL": "https://linkinghub.elsevier.com/retrieve/pii/B9780124167438000014"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2014
+            ]
+          ]
+        },
+        "ISBN": [
+          "9780124167438"
+        ],
+        "references-count": 29,
+        "URL": "https://doi.org/10.1016/b978-0-12-416743-8.00001-4",
+        "published": {
+          "date-parts": [
+            [
+              2014
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              2,
+              28
+            ]
+          ],
+          "date-time": "2026-02-28T17:48:37Z",
+          "timestamp": 1772300917191,
+          "version": "3.50.1"
+        },
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "Cambridge University Press",
+        "isbn-type": [
+          {
+            "value": "9781107050877",
+            "type": "print"
+          },
+          {
+            "value": "9781107279667",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "DOI": "10.1017/cbo9781107279667.013",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2018,
+              5,
+              28
+            ]
+          ],
+          "date-time": "2018-05-28T15:42:05Z",
+          "timestamp": 1527522125000
+        },
+        "page": "425-502",
+        "source": "Crossref",
+        "is-referenced-by-count": 27,
+        "title": [
+          "Introduction to algorithms"
+        ],
+        "prefix": "10.1017",
+        "member": "56",
+        "container-title": [
+          "Optimization Models"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2021,
+              8,
+              26
+            ]
+          ],
+          "date-time": "2021-08-26T21:59:40Z",
+          "timestamp": 1630015180000
+        },
+        "score": 16.942211,
+        "resource": {
+          "primary": {
+            "URL": "https://www.cambridge.org/highereducation/books/optimization-models/B49D5B838649B04D8483A4CF85882003?chapterId=CBO9781107279667A081#contents"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              null
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781107050877",
+          "9781107279667"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.1017/cbo9781107279667.013"
+      }
+    ],
+    "items-per-page": 5,
+    "query": {
+      "start-index": 0,
+      "search-terms": null
+    }
+  }
+}
