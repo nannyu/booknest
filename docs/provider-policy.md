@@ -229,6 +229,48 @@ HTML/SPA 解析，需自行评估服务条款。
 
 ---
 
+## 商业 ISBN Provider（可选，需 API key）
+
+| 项 | 值 |
+|---|---|
+| 数据来源 | 由 `COMMERCIAL_ISBN_PRESET` 决定 |
+| 默认启用 | ❌ |
+| 实现状态 | ✅ 已实现（v0.1） |
+| 是否需要 Key | ✅ 必填 |
+| 允许缓存 | ✅ |
+| Cache TTL | 90 天 |
+
+### 内置 preset
+
+| preset | URL 模板 | 认证 header | 文档 |
+|---|---|---|---|
+| `isbndb` | `https://api2.isbndb.com/book/{isbn}` | `Authorization: {key}` | https://isbndb.com/api/v2/docs |
+| `api_ninjas` | `https://api.api-ninjas.com/v1/isbn?isbn={isbn}` | `X-Api-Key: {key}` | https://api-ninjas.com/api/isbn |
+
+`COMMERCIAL_ISBN_API_URL` 可选；填了会覆盖 preset 的默认 endpoint（用于自托管或代理场景）。
+
+### 配置示例
+
+```env
+ENABLE_COMMERCIAL_ISBN=true
+COMMERCIAL_ISBN_PRESET=isbndb
+COMMERCIAL_ISBN_API_KEY=YOUR_KEY
+```
+
+### 已知限制
+
+- v0.1 只实现 ISBN 精确查询；不支持书名搜索（多数商业服务不提供或限制严格）
+- 不同 preset 的响应字段覆盖度不同：ISBNdb 通常包含封面/简介/分类，API Ninjas 字段较少
+- 如要接入新服务商，扩展 `apps/api/src/providers/commercial-isbn/presets.ts` 即可
+
+### 合规注意
+
+- 商业服务的服务条款（ToS）由使用者自行确认（缓存、再分发权限等）
+- 不允许把商业服务的批量数据回传到公开仓库或长期镜像
+- 默认关闭；启用代表使用者已同意服务商 ToS
+
+---
+
 ## ❌ 明确不接入的数据源
 
 | 数据源 | 原因 |
@@ -237,7 +279,6 @@ HTML/SPA 解析，需自行评估服务条款。
 | 京东 / 当当 / 淘宝 | 商品页，非开放书目源，反爬严重 |
 | 微信读书 | 平台封闭 |
 | 个人维护的 ISBN API | 长期可用性无保证 |
-| ISBNdb 商业版 | 长期免费不确定 |
 
 ---
 

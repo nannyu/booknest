@@ -106,12 +106,13 @@ booknest/
 |---|---|---|---|
 | **Crossref** | 学术专著、教材、会议论文 | ✅ 已实现 | 无需 key；polite pool 建议带 mailto |
 | **Library of Congress** | 英文权威馆藏 | ✅ 已实现 | 无需 key，`?fo=json` 即返 JSON |
+| **商业 ISBN 服务** | ISBNdb / API Ninjas / 自托管 | ✅ 已实现 | 内置 2 个 preset，需 API key |
 | NLC OPAC | 中国国家图书馆 | ⚠️ 未实现 | ALEPH 系统，存在会话/IP 限制 |
 | CALIS | 高校联合书目 | ⚠️ 未实现 | React SPA，需逆向 JS bundle |
 | PDC | 中国国家版本数据中心 | ⚠️ 未实现 | 暂未找到稳定公开端点 |
 | WorldCat | 全球图书馆联合目录 | ⚠️ 未实现 | OCLC 免费 API 已于 2024-12 停用 |
 
-启用方式：在 `.env` 中设置 `ENABLE_CROSSREF=true` / `ENABLE_LOC=true` 即可。其他 Provider 已在 `config/providers.ts` 中预留位置，待上游接口稳定后再补实现。
+启用方式：在 `.env` 中设置 `ENABLE_CROSSREF=true` / `ENABLE_LOC=true` 即可。商业 ISBN 服务额外需要 `COMMERCIAL_ISBN_PRESET` + `COMMERCIAL_ISBN_API_KEY`（详见 [docs/provider-policy.md](docs/provider-policy.md)）。其他 Provider 已在 `config/providers.ts` 中预留位置，待上游接口稳定后再补实现。
 
 > ⚠️ **合规声明**：BookNest 默认只调用 Open Library 与 Google Books 等公开 API。中文增强 Provider 可能访问第三方公开检索页面，**默认全部关闭**，使用者需自行确认目标站点的服务条款。本项目**不包含**豆瓣、京东、当当、淘宝、微信读书等商业平台的抓取逻辑。
 

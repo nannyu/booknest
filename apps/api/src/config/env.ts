@@ -34,9 +34,15 @@ const envSchema = z.object({
   ENABLE_NLC_OPAC: boolFromString.default('false'),
   ENABLE_CALIS: boolFromString.default('false'),
   ENABLE_PDC: boolFromString.default('false'),
+  ENABLE_COMMERCIAL_ISBN: boolFromString.default('false'),
 
   // Google Books
   GOOGLE_BOOKS_API_KEY: z.string().optional(),
+
+  // Commercial ISBN (ISBNdb / API Ninjas / 自定义 endpoint)
+  COMMERCIAL_ISBN_PRESET: z.enum(['isbndb', 'api_ninjas']).default('isbndb'),
+  COMMERCIAL_ISBN_API_KEY: z.string().optional(),
+  COMMERCIAL_ISBN_API_URL: z.string().url().optional(),
 
   // App identity (polite usage)
   APP_USER_AGENT: z

@@ -16,11 +16,13 @@ export interface FetchJsonOptions {
   signal?: AbortSignal;
   /** 用于日志/错误提示的 Provider 名。 */
   provider: string;
+  /** 额外 HTTP headers（如商业 API 的认证头），会合并到默认 headers 上。 */
+  headers?: Record<string, string>;
 }
 
 export async function fetchJson<T = unknown>(
   url: string,
-  { timeoutMs = 8000, signal, provider }: FetchJsonOptions,
+  { timeoutMs = 8000, signal, provider, headers: extraHeaders }: FetchJsonOptions,
 ): Promise<T> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(new Error('timeout')), timeoutMs);
@@ -35,6 +37,7 @@ export async function fetchJson<T = unknown>(
       headers: {
         'user-agent': ua,
         accept: 'application/json',
+        ...extraHeaders,
       },
       signal: ctrl.signal,
     });

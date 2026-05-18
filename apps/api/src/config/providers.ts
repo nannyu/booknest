@@ -9,6 +9,7 @@
  */
 
 import type { BookProvider, ProviderConfig } from '@booknest/shared';
+import { CommercialIsbnProvider } from '../providers/commercial-isbn/index.js';
 import { CrossrefProvider } from '../providers/crossref/index.js';
 import { GoogleBooksProvider } from '../providers/google-books/index.js';
 import { LOCProvider } from '../providers/loc/index.js';
@@ -64,6 +65,18 @@ export const providerConfigs: Record<string, ProviderConfig> = {
     cacheTtlDays: 90,
     timeoutMs: 8000,
   },
+  commercial_isbn: {
+    name: 'commercial_isbn',
+    enabled: env.ENABLE_COMMERCIAL_ISBN,
+    priority: 70,
+    riskLevel: 'medium',
+    supportsISBN: true,
+    supportsTitleSearch: false,
+    supportsCover: true,
+    rateLimitPerMinute: 60,
+    cacheTtlDays: 90,
+    timeoutMs: 8000,
+  },
 };
 
 const PROVIDER_FACTORIES: Record<string, () => BookProvider> = {
@@ -71,6 +84,7 @@ const PROVIDER_FACTORIES: Record<string, () => BookProvider> = {
   google_books: () => new GoogleBooksProvider(),
   crossref: () => new CrossrefProvider(),
   loc: () => new LOCProvider(),
+  commercial_isbn: () => new CommercialIsbnProvider(),
 };
 
 const instances = new Map<string, BookProvider>();

@@ -16,14 +16,14 @@ type Source = string;
 
 /** 字段 → 来源优先级。靠前的源胜出。 */
 const FIELD_PRIORITY: Record<string, Source[]> = {
-  isbn: ['pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  title: ['pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  authors: ['pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  publisher: ['pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  publishedDate: ['pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  categories: ['pdc', 'nlc_opac', 'calis', 'open_library', 'google_books', 'crossref', 'loc'],
-  coverUrl: ['google_books', 'open_library', 'loc'],
-  description: ['google_books', 'open_library', 'crossref', 'loc'],
+  isbn: ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
+  title: ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
+  authors: ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
+  publisher: ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
+  publishedDate: ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
+  categories: ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'open_library', 'google_books', 'crossref', 'loc'],
+  coverUrl: ['commercial_isbn', 'google_books', 'open_library', 'loc'],
+  description: ['commercial_isbn', 'google_books', 'open_library', 'crossref', 'loc'],
 };
 
 export interface MergedCandidate extends BookCandidate {
