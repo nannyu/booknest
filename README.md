@@ -13,12 +13,14 @@ BookNest is an open-source book metadata aggregation service for ISBN and title 
 ## ✨ 特性
 
 - 🔍 **ISBN 精确查询** — 支持 ISBN-10/13 清洗、校验、多源聚合
-- 📚 **书名/作者搜索** — 中文标题归一化 + 候选评分，不强行唯一匹配
-- 🌐 **多源聚合** — 默认 Open Library + Google Books，可扩展 Crossref/LoC/中文增强源
+- 📚 **书名 / 作者搜索** — 中文标题归一化 + queryType-aware 评分，作者可单独搜
+- 🌐 **多源聚合** — 默认 Open Library + Google Books，可选 Crossref / LOC / 商业 ISBN (ISBNdb 等)
 - 🧠 **字段级合并** — 不同来源在不同字段上可信度不同，按字段优先级合并
-- 💾 **本地缓存** — SQLite 缓存，保护免费 API、降低延迟
+- 💯 **可信度量化** — 多源共识 + 数据完整度联合打分，可指导前端 UI 决策
+- 💾 **本地缓存 + 持久化** — SQLite 缓存 + 完整 Work/Edition 表，详情页可深链
 - 🧩 **Work / Edition 分离** — 区分作品概念和具体版本
 - 📝 **人工修正** — Correction API 持续提升数据质量
+- 🌐 **单页前端** — 搜索 + 详情 + hash 路由，无 SPA 框架依赖
 - 🐳 **一键部署** — Docker Compose 即可启动
 
 ## 🚀 快速开始
@@ -53,11 +55,17 @@ curl http://localhost:3000/api/books/isbn/9787536692930
 # 书名搜索
 curl 'http://localhost:3000/api/books/search?q=三体&limit=5'
 
+# 按作者搜
+curl 'http://localhost:3000/api/books/search?q=刘慈欣&type=author'
+
 # 作者+书名
 curl 'http://localhost:3000/api/books/search?q=刘慈欣%20三体'
 
+# 详情页（DB id）
+curl http://localhost:3000/api/books/{id}
+
 # Provider 健康状态
-curl http://localhost:3000/api/providers/status
+curl http://localhost:3000/api/providers
 ```
 
 ## 📖 文档
@@ -118,8 +126,8 @@ booknest/
 
 ## 🛣️ 路线图
 
-- [x] **v0.1 MVP** — Open Library + Google Books、ISBN/书名查询、SQLite 缓存、Docker Compose
-- [ ] **v0.2 数据质量** — Work/Edition 模型、源快照、修正 API、熔断限流
+- [x] **v0.1 MVP** — 多查询模式（ISBN/书名/作者）、6 个 Provider、完整持久化、详情页、Docker
+- [ ] **v0.2 数据质量** — 修正自动应用、状态面板、Provider health 可视化、源快照 API
 - [ ] **v0.3 中文增强** — NLC OPAC、CALIS、出版社别名、作者角色识别
 - [ ] **v0.4 本地索引** — Open Library dump 导入、FTS5、定期 refresh
 - [ ] **v0.5 生态集成** — MCP Server、CLI、JS/Python SDK、Web 后台

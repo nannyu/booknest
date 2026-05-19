@@ -84,8 +84,8 @@ curl 'http://localhost:3000/api/books/search?q=刘慈欣&type=author&limit=10'
 | 字段 | 说明 |
 |---|---|
 | `workId` | 作品 ID；同书不同 ISBN 可共享 |
-| `recommended` | 系统推荐的首条候选 |
-| `needsReview` | `confidence < 70` 时建议人工核对 |
+| `recommended` | 系统推荐的首条候选（ISBN 命中 & 分 ≥ 80，或非 ISBN 查询 top 领先 second > 20 分） |
+| `needsReview` | `confidence < 60` 时建议人工核对 |
 | `ephemeral` | `true` 表示未写入 DB，详情深链刷新会 404 |
 
 **queryType 自动检测（未传 `type` 时）**

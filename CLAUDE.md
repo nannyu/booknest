@@ -4,7 +4,7 @@
 
 ## 项目一句话
 
-BookNest 是一个**开源图书元数据聚合服务**：输入 ISBN/书名 → 并发查 Open Library + Google Books → 字段级合并 + 评分 → 返回候选 Edition。
+BookNest 是一个**开源图书元数据聚合服务**：输入 ISBN / 书名 / 作者 → 并发查 Open Library + Google Books（+ 可选 Crossref / LOC / 商业 ISBN）→ 字段级合并 + 评分 → 落库 + 返回候选 Edition。
 
 ## 必读三件套（按顺序）
 
@@ -29,9 +29,17 @@ BookNest 是一个**开源图书元数据聚合服务**：输入 ISBN/书名 →
 apps/api/src/
   api/routes/   ← HTTP 层（薄，只做参数校验+调用 core）
   core/         ← 业务核心（无副作用、可单测）
+    router.ts        # 编排：cache → provider → merge → score → persist
+    merge.ts         # 字段级合并
+    score.ts         # queryType-aware + 多源共识 + 完整度
+    cache.ts / rate-limit.ts / circuit-breaker.ts
+    persist.ts       # MergedCandidate → works / editions / ...
+    load.ts          # editionId → RankedBook（详情页）
   providers/    ← 数据源适配（一个目录一个 provider）
   db/           ← Drizzle schema + 迁移
   config/       ← env + providerConfigs
+  lib/          ← http.ts + provider-fetch.ts
+  public/       ← 前端单页（hash 路由 + 详情视图）
   server.ts     ← Hono app 入口
 
 packages/shared/  ← 跨包共享类型（BookCandidate、ISBN 工具）
@@ -82,9 +90,15 @@ docs/             ← 架构 / API / Provider 策略
 
 ### 调整评分
 
-1. `core/score.ts` 是纯函数，必须可单测
-2. 改完跑 `pnpm test core/score` 看 baseline 测试不退化
-3. 真有理由调权重，在 commit message / PR 描述里说清楚
+1. `core/score.ts` 是纯函数，必须可单测；接受 `MergedCandidate`，不是 `BookCandidate`
+2. 现行公式（4 个模块）：
+   - ISBN 命中 +60
+   - queryType-aware 相似度：title/author 权重按 queryType 不同（isbn 20/10、title 50/10、title_author 30/30、author 10/60）
+   - 多源共识：2 源 +10、3 源 +15、4+ 源 +20
+   - 完整度：authors/publisher/publishedDate/description 各 +3，pageCount/language/categories 各 +2，cover +3
+3. 阈值：`recommended ≥ 80`、`needsReview < 60`（基于 50 ISBN 实测分布定的，**不要随手调**）
+4. 改完跑 `pnpm test core/score` 看 baseline 测试不退化
+5. 真有理由调权重，在 commit message / PR 描述里说清楚
 
 ### 改 schema
 
@@ -108,10 +122,13 @@ docs/             ← 架构 / API / Provider 策略
 pnpm install
 cp .env.example .env
 pnpm db:migrate
-pnpm dev              # tsx watch apps/api/src/server.ts
+pnpm dev              # 自动 build:css → tsx watch apps/api/src/server.ts
 # 另一个终端
 curl http://localhost:3000/healthz
 curl http://localhost:3000/api/books/isbn/9787536692930
+curl 'http://localhost:3000/api/books/search?q=刘慈欣&type=author'
+# 前端
+open http://localhost:3000/
 ```
 
 ## 跑测试
@@ -125,11 +142,19 @@ pnpm test --coverage
 
 ## 当前阶段
 
-**v0.1 MVP** —— 只做 ISBN/书名查询 + Open Library + Google Books + SQLite 缓存。
+**v0.1 已交付**：
+- ISBN / 书名 / **作者** / 作者+书名 四种查询
+- Provider：Open Library + Google Books 默认开；Crossref + LOC + 商业 ISBN (ISBNdb/API Ninjas) 可选
+- 完整持久化（works / editions / contributors / edition_sources / external_identifiers）
+- 详情页 `GET /api/books/:id` + 前端 hash 路由
+- 评分：queryType-aware + 多源共识 + 完整度
+- 缓存 / 限流 / 熔断 / 错误隔离
+- SQLite + Drizzle + WAL，本地化部署
+- 单页前端（无 SPA 框架，原生 JS + Tailwind 本地构建）
 
 后续路线图见 [README.md#路线图](README.md#-路线图)。
 
-**不要超前做** v0.2 才有的修正流、状态页、熔断面板——这些是有意推迟的，先把 MVP 跑通比啥都重要。
+**不要超前做** v0.2 才有的修正流自动应用、状态面板、Open Library dump 导入——这些是有意推迟的。
 
 ## 用户偏好（追加在这里）
 
