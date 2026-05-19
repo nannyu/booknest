@@ -6,7 +6,7 @@
   <title>BookNest - 图书搜索</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    .book-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .book-card { transition: transform 0.15s ease, box-shadow 0.15s ease; cursor: pointer; }
     .book-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
   </style>
 </head>
@@ -14,52 +14,130 @@
   <div class="max-w-3xl mx-auto px-4 py-8">
     <!-- Header -->
     <div class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">BookNest</h1>
-      <p class="text-gray-500">开源图书元数据聚合服务 · 支持 ISBN / 书名搜索</p>
+      <h1 class="text-3xl font-bold text-gray-900 mb-2 cursor-pointer" onclick="goSearch()">BookNest</h1>
+      <p class="text-gray-500">开源图书元数据聚合服务 · 支持 ISBN / 书名 / 作者搜索</p>
     </div>
 
-    <!-- Search -->
-    <div class="flex gap-2 mb-6">
-      <select id="type"
-        class="px-3 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        <option value="">自动检测</option>
-        <option value="isbn">按 ISBN</option>
-        <option value="title">按书名</option>
-        <option value="author">按作者</option>
-        <option value="title_author">作者+书名</option>
-      </select>
-      <input id="q" type="text"
-        placeholder="输入 ISBN（如 9787536692930）、书名（如 三体）或作者（如 刘慈欣）..."
-        class="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
-      <button id="btn" onclick="search()"
-        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors">
-        搜索
+    <!-- ─────────── 搜索视图 ─────────── -->
+    <div id="search-view">
+      <div class="flex gap-2 mb-6">
+        <select id="type"
+          class="px-3 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <option value="">自动检测</option>
+          <option value="isbn">按 ISBN</option>
+          <option value="title">按书名</option>
+          <option value="author">按作者</option>
+          <option value="title_author">作者+书名</option>
+        </select>
+        <input id="q" type="text"
+          placeholder="输入 ISBN（如 9787536692930）、书名（如 三体）或作者（如 刘慈欣）..."
+          class="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
+        <button id="btn" onclick="search()"
+          class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors">
+          搜索
+        </button>
+      </div>
+
+      <div id="loading" class="hidden text-center text-gray-500 py-8">搜索中...</div>
+      <div id="error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4"></div>
+      <div id="empty" class="hidden text-center text-gray-400 py-8">未找到结果</div>
+      <div id="results" class="space-y-4"></div>
+    </div>
+
+    <!-- ─────────── 详情视图 ─────────── -->
+    <div id="detail-view" class="hidden">
+      <button onclick="goSearch()"
+        class="mb-4 text-sm text-blue-600 hover:text-blue-700 inline-flex items-center gap-1">
+        ← 返回搜索
       </button>
+      <div id="detail-loading" class="hidden text-center text-gray-500 py-8">加载中...</div>
+      <div id="detail-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg"></div>
+      <div id="detail-content"></div>
     </div>
 
-    <!-- Status -->
-    <div id="loading" class="hidden text-center text-gray-500 py-8">搜索中...</div>
-    <div id="error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4"></div>
-    <div id="empty" class="hidden text-center text-gray-400 py-8">未找到结果</div>
-
-    <!-- Results -->
-    <div id="results" class="space-y-4"></div>
-
-    <!-- Footer -->
     <div class="text-center text-gray-400 text-sm mt-12 pb-4">
-      数据来源：Open Library · Google Books
+      数据来源：Open Library · Google Books · Crossref · LOC
     </div>
   </div>
 
   <script>
+    const SOURCE_NAMES = {
+      google_books: 'Google Books',
+      open_library: 'Open Library',
+      crossref: 'Crossref',
+      loc: 'Library of Congress',
+      commercial_isbn: '商业 ISBN 服务',
+    };
+
+    const lastResults = new Map();  // id -> book，搜索结果在内存里缓存供详情视图复用
+
     const qInput = document.getElementById('q');
     const btn = document.getElementById('btn');
     const loading = document.getElementById('loading');
     const errorEl = document.getElementById('error');
     const emptyEl = document.getElementById('empty');
     const resultsEl = document.getElementById('results');
+    const searchView = document.getElementById('search-view');
+    const detailView = document.getElementById('detail-view');
+    const detailLoading = document.getElementById('detail-loading');
+    const detailError = document.getElementById('detail-error');
+    const detailContent = document.getElementById('detail-content');
 
     qInput.addEventListener('keypress', e => { if (e.key === 'Enter') search(); });
+    window.addEventListener('hashchange', handleRoute);
+    window.addEventListener('load', handleRoute);
+
+    function handleRoute() {
+      const hash = location.hash;
+      const m = hash.match(/^#book\/(.+)$/);
+      if (m) {
+        showDetail(decodeURIComponent(m[1]));
+      } else {
+        showSearch();
+      }
+    }
+
+    function goSearch() {
+      if (location.hash) {
+        location.hash = '';
+      } else {
+        showSearch();
+      }
+    }
+
+    function showSearch() {
+      detailView.classList.add('hidden');
+      searchView.classList.remove('hidden');
+    }
+
+    async function showDetail(id) {
+      searchView.classList.add('hidden');
+      detailView.classList.remove('hidden');
+      detailContent.innerHTML = '';
+      detailError.classList.add('hidden');
+
+      let book = lastResults.get(id);
+      if (!book) {
+        // 不在缓存里（直接访问链接或刷新过），尝试用 id 作为 ISBN 重新拉
+        detailLoading.classList.remove('hidden');
+        try {
+          const res = await fetch('/api/books/isbn/' + encodeURIComponent(id));
+          const data = await res.json();
+          if (!res.ok || data.error) throw new Error((data.error && data.error.message) || '加载失败');
+          book = (data.results && data.results[0]) || null;
+          if (!book) throw new Error('未找到该 ISBN 对应的图书');
+          lastResults.set(id, book);
+        } catch (err) {
+          detailLoading.classList.add('hidden');
+          detailError.textContent = err.message;
+          detailError.classList.remove('hidden');
+          return;
+        }
+        detailLoading.classList.add('hidden');
+      }
+
+      renderDetail(book);
+    }
 
     async function search() {
       const q = qInput.value.trim();
@@ -69,7 +147,7 @@
       const params = new URLSearchParams({ q, limit: '10' });
       if (type) params.set('type', type);
 
-      setState('loading');
+      setSearchState('loading');
 
       try {
         const res = await fetch('/api/books/search?' + params.toString());
@@ -81,19 +159,22 @@
 
         const books = data.results || [];
         if (books.length === 0) {
-          setState('empty');
+          setSearchState('empty');
           return;
         }
 
+        // 缓存结果供详情视图复用
+        for (const b of books) lastResults.set(b.id, b);
+
         renderResults(books);
-        setState('results');
+        setSearchState('results');
       } catch (err) {
         errorEl.textContent = err.message;
-        setState('error');
+        setSearchState('error');
       }
     }
 
-    function setState(state) {
+    function setSearchState(state) {
       loading.classList.toggle('hidden', state !== 'loading');
       errorEl.classList.toggle('hidden', state !== 'error');
       emptyEl.classList.toggle('hidden', state !== 'empty');
@@ -127,12 +208,11 @@
         if (book.recommended) confidenceLabel.push('推荐');
         if (book.needsReview) confidenceLabel.push('需审核');
 
-        const sourceNames = { google_books: 'Google Books', open_library: 'Open Library' };
         const sourceTags = (book.sources || []).map(s =>
-          `<span class="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-100">${sourceNames[s.name] || s.name}</span>`
+          `<span class="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-100">${SOURCE_NAMES[s.name] || s.name}</span>`
         ).join('');
 
-        return `<div class="book-card bg-white rounded-lg shadow p-4 flex gap-4">
+        return `<div class="book-card bg-white rounded-lg shadow p-4 flex gap-4" onclick="location.hash='#book/${encodeURIComponent(book.id)}'">
           ${cover}
           <div class="flex-1 min-w-0">
             <h2 class="text-lg font-bold text-gray-900 truncate">${escapeHtml(book.title)}</h2>
@@ -147,6 +227,70 @@
           </div>
         </div>`;
       }).join('');
+    }
+
+    function renderDetail(book) {
+      const cover = book.coverUrl
+        ? `<img src="${escapeHtml(book.coverUrl)}" class="w-48 max-w-full rounded shadow" alt="">`
+        : `<div class="w-48 h-72 bg-gray-200 rounded shadow flex items-center justify-center text-gray-400">无封面</div>`;
+
+      const authors = (book.authors || []).map(a => escapeHtml(a.name)).join('、') || '未知作者';
+
+      const confidenceClass = book.confidence > 80 ? 'bg-green-50 text-green-700 border-green-200'
+        : book.confidence > 50 ? 'bg-yellow-50 text-yellow-700 border-yellow-200'
+        : 'bg-gray-50 text-gray-600 border-gray-200';
+
+      const sourceTags = (book.sources || []).map(s =>
+        `<span class="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-100">${SOURCE_NAMES[s.name] || s.name}</span>`
+      ).join('');
+
+      const rows = [
+        ['出版社', book.publisher],
+        ['出版日期', book.publishedDate],
+        ['语言', book.language],
+        ['页数', book.pageCount],
+        ['ISBN-13', book.isbn13],
+        ['ISBN-10', book.isbn10],
+      ].filter(([, v]) => v != null && v !== '');
+
+      const meta = rows.map(([k, v]) =>
+        `<div class="flex"><span class="w-20 text-gray-500 flex-shrink-0">${k}</span><span class="text-gray-900 font-mono break-all">${escapeHtml(String(v))}</span></div>`
+      ).join('');
+
+      const categories = (book.categories || []).slice(0, 12).map(c =>
+        `<span class="inline-block px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded">${escapeHtml(c)}</span>`
+      ).join('');
+
+      detailContent.innerHTML = `
+        <div class="bg-white rounded-lg shadow p-6">
+          <div class="flex flex-col md:flex-row gap-6">
+            <div class="flex-shrink-0">${cover}</div>
+            <div class="flex-1 min-w-0">
+              <h1 class="text-2xl font-bold text-gray-900">${escapeHtml(book.title)}</h1>
+              ${book.subtitle ? `<p class="text-gray-600 mt-1">${escapeHtml(book.subtitle)}</p>` : ''}
+              <p class="text-gray-800 mt-3">${authors}</p>
+
+              <div class="flex items-center gap-2 mt-4 flex-wrap">
+                ${sourceTags}
+                ${book.confidence != null ? `<span class="inline-block px-2 py-0.5 text-xs rounded-full border ${confidenceClass}">置信度 ${book.confidence}%</span>` : ''}
+                ${book.recommended ? `<span class="inline-block px-2 py-0.5 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">推荐</span>` : ''}
+                ${book.needsReview ? `<span class="inline-block px-2 py-0.5 bg-yellow-50 text-yellow-700 text-xs rounded-full border border-yellow-200">需审核</span>` : ''}
+              </div>
+
+              ${meta ? `<div class="mt-5 space-y-2 text-sm">${meta}</div>` : ''}
+
+              ${categories ? `<div class="mt-5 flex flex-wrap gap-1">${categories}</div>` : ''}
+            </div>
+          </div>
+
+          ${book.description ? `
+            <div class="mt-6 pt-6 border-t border-gray-100">
+              <h2 class="text-sm font-semibold text-gray-500 mb-2">简介</h2>
+              <p class="text-gray-800 leading-relaxed whitespace-pre-line">${escapeHtml(book.description)}</p>
+            </div>
+          ` : ''}
+        </div>
+      `;
     }
 
     function escapeHtml(s) {
