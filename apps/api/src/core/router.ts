@@ -272,7 +272,7 @@ function toRanked(
     categories: merged.categories,
     confidence: score,
     recommended: false,
-    needsReview: score < 70,
+    needsReview: score < 60,
     sources: merged.sourceMeta.map((s) => ({
       name: s.name,
       externalId: s.externalId,
@@ -292,7 +292,7 @@ function applyReturnPolicy(
   const second = scored[1];
   const isISBN = query.queryType === 'isbn';
 
-  if (isISBN && top.s > 90) {
+  if (isISBN && top.s >= 80) {
     ranked[0]!.recommended = true;
   } else if (!isISBN && (second === undefined || top.s - second.s > 20)) {
     ranked[0]!.recommended = true;

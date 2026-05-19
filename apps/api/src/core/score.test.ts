@@ -4,14 +4,17 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { BookCandidate, SearchQuery } from '@booknest/shared';
+import type { SearchQuery } from '@booknest/shared';
+import type { MergedCandidate } from './merge.js';
 import { scoreCandidate } from './score.js';
 
-function cand(over: Partial<BookCandidate> = {}): BookCandidate {
+function cand(over: Partial<MergedCandidate> = {}): MergedCandidate {
   return {
     title: '三体',
     authors: ['刘慈欣'],
     source: 'open_library',
+    sources: ['open_library'],
+    sourceMeta: [{ name: 'open_library' }],
     raw: null,
     ...over,
   };
@@ -77,7 +80,14 @@ describe('scoreCandidate', () => {
 
   it('clamps to [0, 100]', () => {
     const q: SearchQuery = { raw: '?', queryType: 'title', title: 'x' };
-    const broken = { title: '', authors: [], source: 's', raw: null } as BookCandidate;
+    const broken = {
+      title: '',
+      authors: [],
+      source: 's',
+      sources: [],
+      sourceMeta: [],
+      raw: null,
+    } as MergedCandidate;
     const s = scoreCandidate(broken, q);
     expect(s).toBeGreaterThanOrEqual(0);
     expect(s).toBeLessThanOrEqual(100);
@@ -127,5 +137,52 @@ describe('scoreCandidate', () => {
     const c = cand({ isbn13: '9787536692930' });
     const s = scoreCandidate(c, q);
     expect(s).toBeGreaterThan(55); // 30 + 30 = 60 - 0 + 0 ≈ 60
+  });
+
+  it('multi-source consensus adds points (2 sources +10)', () => {
+    const q: SearchQuery = { raw: '9787536692930', queryType: 'isbn', isbn: '9787536692930' };
+    const single = cand({ isbn13: '9787536692930' });
+    const dual = cand({ isbn13: '9787536692930', sources: ['open_library', 'google_books'] });
+    expect(scoreCandidate(dual, q) - scoreCandidate(single, q)).toBe(10);
+  });
+
+  it('multi-source consensus: 3 sources +15, 4+ sources +20', () => {
+    const q: SearchQuery = { raw: '9787536692930', queryType: 'isbn', isbn: '9787536692930' };
+    const triple = cand({ isbn13: '9787536692930', sources: ['ol', 'gb', 'crossref'] });
+    const quad = cand({ isbn13: '9787536692930', sources: ['ol', 'gb', 'crossref', 'loc'] });
+    const single = cand({ isbn13: '9787536692930' });
+    expect(scoreCandidate(triple, q) - scoreCandidate(single, q)).toBe(15);
+    expect(scoreCandidate(quad, q) - scoreCandidate(single, q)).toBe(20);
+  });
+
+  it('field completeness raises confidence above the bare baseline', () => {
+    const q: SearchQuery = { raw: '9787536692930', queryType: 'isbn', isbn: '9787536692930' };
+    const bare = cand({ isbn13: '9787536692930', authors: [] });
+    const rich = cand({
+      isbn13: '9787536692930',
+      publisher: '重庆出版社',
+      publishedDate: '2008',
+      description: '一部硬科幻小说...',
+      pageCount: 302,
+      language: 'zh',
+      categories: ['Science Fiction', 'Hugo Award'],
+      coverUrl: 'https://x/cover.jpg',
+    });
+    // rich 比 bare 多 3+3+3+3+2+2+2+3 = 21 分
+    expect(scoreCandidate(rich, q) - scoreCandidate(bare, q)).toBeGreaterThanOrEqual(20);
+  });
+
+  it('reaches the recommended threshold (>=80) for typical multi-source ISBN hits', () => {
+    const q: SearchQuery = { raw: '9787536692930', queryType: 'isbn', isbn: '9787536692930' };
+    const typical = cand({
+      isbn13: '9787536692930',
+      publisher: '重庆出版社',
+      publishedDate: '2008',
+      pageCount: 302,
+      language: 'zh',
+      coverUrl: 'https://x/cover.jpg',
+      sources: ['open_library', 'google_books'],
+    });
+    expect(scoreCandidate(typical, q)).toBeGreaterThanOrEqual(80);
   });
 });

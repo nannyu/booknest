@@ -76,8 +76,8 @@ describe('persistMergedCandidate', () => {
     expect(book!.sources).toHaveLength(2);
   });
 
-  it('sets needsReview when confidence below 70', () => {
-    const { editionId } = persistMergedCandidate(sampleCandidate({ isbn13: '9780000000001' }), 65);
+  it('sets needsReview when confidence below 60', () => {
+    const { editionId } = persistMergedCandidate(sampleCandidate({ isbn13: '9780000000001' }), 55);
     const book = loadEditionAsRankedBook(editionId);
     expect(book!.needsReview).toBe(true);
   });

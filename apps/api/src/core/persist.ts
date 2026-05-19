@@ -68,7 +68,7 @@ export function persistMergedCandidate(
 
     const normalizedTitle = normalizeChineseTitle(candidate.title);
     const now = new Date().toISOString();
-    const needsReview = confidence < 70;
+    const needsReview = confidence < 60;
 
     let editionId: string;
     let workId: string;
