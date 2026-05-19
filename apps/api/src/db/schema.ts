@@ -57,6 +57,7 @@ export const editions = sqliteTable(
     language: text('language'),
     coverUrl: text('cover_url'),
     description: text('description'),
+    categories: text('categories', { mode: 'json' }).$type<string[]>(),
     confidence: integer('confidence').notNull().default(0),
     needsReview: integer('needs_review', { mode: 'boolean' }).notNull().default(false),
     createdAt: text('created_at')

@@ -17,6 +17,7 @@ import {
   splitTitleAuthor,
 } from '@booknest/shared';
 import { searchBooks } from '../../core/router.js';
+import { loadEditionAsRankedBook } from '../../core/load.js';
 
 const books = new Hono();
 
@@ -80,6 +81,16 @@ books.get('/isbn/:isbn', async (c) => {
     limit: 5,
   });
   return c.json(result);
+});
+
+// 详情：按 DB edition id 加载（持久化层）
+books.get('/:id', (c) => {
+  const id = c.req.param('id');
+  const book = loadEditionAsRankedBook(id);
+  if (!book) {
+    throw new BookNestError('NOT_FOUND', `edition not found: ${id}`, 404);
+  }
+  return c.json({ result: book });
 });
 
 export default books;

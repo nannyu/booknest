@@ -31,6 +31,7 @@ import { sourceSnapshots } from '../db/schema.js';
 import { buildCacheKey, readCache, writeCache } from './cache.js';
 import { canCall, recordFailure, recordSuccess } from './circuit-breaker.js';
 import { mergeCandidates, type MergedCandidate } from './merge.js';
+import { persistMergedCandidate } from './persist.js';
 import { ensureConfigured, tryAcquire } from './rate-limit.js';
 import { scoreCandidate } from './score.js';
 
@@ -67,7 +68,19 @@ export async function searchBooks(query: SearchQuery): Promise<SearchResult> {
       .map((m) => ({ m, s: scoreCandidate(m, query) }))
       .sort((a, b) => b.s - a.s);
 
-    const ranked = scored.map(({ m, s }) => toRanked(m, s));
+    // 落库：每个候选 upsert 到 editions（连同 contributors / external_identifiers）。
+    // 失败不影响搜索响应，回退到 nanoid 作 id（前端刷新会拉不到，但当前 session 可用）。
+    const ranked = scored.map(({ m, s }) => {
+      let id: string;
+      try {
+        id = persistMergedCandidate(m, s);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[persist] failed:', (err as Error).message);
+        id = nanoid();
+      }
+      return toRanked(m, s, id);
+    });
     applyReturnPolicy(query, scored, ranked);
 
     const limit = query.limit ?? 20;
@@ -211,8 +224,7 @@ function recordSnapshot(input: {
   }
 }
 
-function toRanked(merged: MergedCandidate, score: number): RankedBook {
-  const id = merged.isbn13 ?? merged.isbn10 ?? nanoid();
+function toRanked(merged: MergedCandidate, score: number, id: string): RankedBook {
   return {
     id,
     title: merged.title,

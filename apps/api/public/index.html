@@ -118,14 +118,14 @@
 
       let book = lastResults.get(id);
       if (!book) {
-        // 不在缓存里（直接访问链接或刷新过），尝试用 id 作为 ISBN 重新拉
+        // 不在缓存里（直接访问链接或刷新过），从 DB 拉
         detailLoading.classList.remove('hidden');
         try {
-          const res = await fetch('/api/books/isbn/' + encodeURIComponent(id));
+          const res = await fetch('/api/books/' + encodeURIComponent(id));
           const data = await res.json();
           if (!res.ok || data.error) throw new Error((data.error && data.error.message) || '加载失败');
-          book = (data.results && data.results[0]) || null;
-          if (!book) throw new Error('未找到该 ISBN 对应的图书');
+          book = data.result || null;
+          if (!book) throw new Error('未找到该图书');
           lastResults.set(id, book);
         } catch (err) {
           detailLoading.classList.add('hidden');
