@@ -53,3 +53,6 @@ tmp/
 
 # Cached fixtures from recording scripts (real fixtures committed under fixtures/)
 .recorded/
+
+# graphify 工具输出（本地分析产物，不入库）
+graphify-out/
