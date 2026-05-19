@@ -26,8 +26,15 @@ const FIELD_PRIORITY: Record<string, Source[]> = {
   description: ['commercial_isbn', 'google_books', 'open_library', 'crossref', 'loc'],
 };
 
+export interface SourceMeta {
+  name: string;
+  externalId?: string;
+  externalUrl?: string;
+}
+
 export interface MergedCandidate extends BookCandidate {
   sources: string[];
+  sourceMeta: SourceMeta[];
 }
 
 function isPresent(v: unknown): boolean {
@@ -42,7 +49,8 @@ function groupKey(c: BookCandidate): string {
   if (c.isbn10) return `isbn10:${c.isbn10}`;
   const nt = normalizeChineseTitle(c.title);
   const author = c.authors[0] ? normalizeAuthorName(c.authors[0]) : '';
-  return `t:${nt}|a:${author}`;
+  const publisher = (c.publisher ?? '').toLowerCase().replace(/\s+/g, '');
+  return `t:${nt}|a:${author}|p:${publisher}`;
 }
 
 function pickField<K extends keyof BookCandidate>(
@@ -81,12 +89,19 @@ function mergeGroup(group: BookCandidate[]): MergedCandidate {
   const base = group[0]!;
   const title = pickField(group, 'title', FIELD_PRIORITY.title) ?? base.title;
   const authors = pickField(group, 'authors', FIELD_PRIORITY.authors) ?? base.authors;
+  const sourceMeta = group.map((c) => ({
+    name: c.source,
+    externalId: c.externalId,
+    externalUrl: c.externalUrl,
+  }));
 
   return {
     ...base,
     title,
     subtitle: pickField(group, 'subtitle', FIELD_PRIORITY.title),
     authors,
+    translators: pickField(group, 'translators', FIELD_PRIORITY.authors),
+    editors: pickField(group, 'editors', FIELD_PRIORITY.authors),
     publisher: pickField(group, 'publisher', FIELD_PRIORITY.publisher),
     publishedDate: pickField(group, 'publishedDate', FIELD_PRIORITY.publishedDate),
     isbn10: pickField(group, 'isbn10', FIELD_PRIORITY.isbn),
@@ -102,6 +117,7 @@ function mergeGroup(group: BookCandidate[]): MergedCandidate {
     externalUrl: pickFirstPresent(group, 'externalUrl') ?? base.externalUrl,
     raw: group.map((c) => ({ source: c.source, raw: c.raw })),
     sources,
+    sourceMeta,
   };
 }
 

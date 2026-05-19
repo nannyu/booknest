@@ -5,7 +5,12 @@
 import { eq } from 'drizzle-orm';
 import type { ContributorRole, RankedBook } from '@booknest/shared';
 import { getDb } from '../db/client.js';
-import { contributors, editionContributors, editions, externalIdentifiers } from '../db/schema.js';
+import {
+  contributors,
+  editionContributors,
+  editionSources,
+  editions,
+} from '../db/schema.js';
 
 const VALID_ROLES: readonly ContributorRole[] = ['author', 'translator', 'editor', 'illustrator', 'other'];
 
@@ -31,9 +36,9 @@ export function loadEditionAsRankedBook(id: string): RankedBook | null {
     .all();
 
   const srcRows = db
-    .selectDistinct({ source: externalIdentifiers.source })
-    .from(externalIdentifiers)
-    .where(eq(externalIdentifiers.editionId, id))
+    .select()
+    .from(editionSources)
+    .where(eq(editionSources.editionId, id))
     .all();
 
   return {
@@ -54,6 +59,10 @@ export function loadEditionAsRankedBook(id: string): RankedBook | null {
     confidence: ed.confidence,
     recommended: false,
     needsReview: ed.needsReview,
-    sources: srcRows.map((s) => ({ name: s.source })),
+    sources: srcRows.map((s) => ({
+      name: s.source,
+      externalId: s.externalId ?? undefined,
+      externalUrl: s.externalUrl ?? undefined,
+    })),
   };
 }

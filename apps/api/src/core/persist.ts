@@ -1,34 +1,56 @@
 /**
- * 合并候选 → DB 持久化（works / editions / contributors / external_identifiers）。
+ * 合并候选 → DB 持久化（works / editions / contributors / edition_sources / external_identifiers）。
  *
  * v0.1 简化策略：
- * - 每个 Edition 1:1 创建一个 Work（v0.2 再做真正的 work 聚类）
+ * - 每个新 Edition 创建独立 Work（v0.2 再做 work 聚类）
  * - 按 ISBN-13、ISBN-10 顺序匹配已有 Edition；无则插入
  * - 字段直接覆盖（candidate 总是当前合并的最新结果）
- * - external_identifiers 只记 `source` 维度（v0.2 再保留每源的 externalId）
  *
  * 持久化失败不影响搜索返回——上层用 try-catch 包裹。
  */
 
 import { eq } from 'drizzle-orm';
 import { nanoid } from 'nanoid';
+import type { ContributorRole } from '@booknest/shared';
 import { normalizeAuthorName, normalizeChineseTitle } from '@booknest/shared';
 import { getDb } from '../db/client.js';
 import {
   contributors,
   editionContributors,
+  editionSources,
   editions,
   externalIdentifiers,
   works,
 } from '../db/schema.js';
 import type { MergedCandidate } from './merge.js';
 
+interface ContributorRow {
+  name: string;
+  role: ContributorRole;
+  position: number;
+}
+
+function collectContributors(candidate: MergedCandidate): ContributorRow[] {
+  const rows: ContributorRow[] = [];
+  let pos = 0;
+  for (const name of candidate.authors) {
+    rows.push({ name, role: 'author', position: pos++ });
+  }
+  for (const name of candidate.translators ?? []) {
+    rows.push({ name, role: 'translator', position: pos++ });
+  }
+  for (const name of candidate.editors ?? []) {
+    rows.push({ name, role: 'editor', position: pos++ });
+  }
+  return rows;
+}
+
 export function persistMergedCandidate(candidate: MergedCandidate, confidence: number): string {
   const db = getDb();
 
   return db.transaction((tx) => {
     let existing = candidate.isbn13
-      ? tx.select().from(editions).where(eq(editions.isbn13, candidate.isbn13)).get() ?? null
+      ? (tx.select().from(editions).where(eq(editions.isbn13, candidate.isbn13)).get() ?? null)
       : null;
     if (!existing && candidate.isbn10) {
       existing = tx.select().from(editions).where(eq(editions.isbn10, candidate.isbn10)).get() ?? null;
@@ -36,6 +58,7 @@ export function persistMergedCandidate(candidate: MergedCandidate, confidence: n
 
     const normalizedTitle = normalizeChineseTitle(candidate.title);
     const now = new Date().toISOString();
+    const needsReview = confidence < 70;
 
     let editionId: string;
     let workId: string;
@@ -59,7 +82,7 @@ export function persistMergedCandidate(candidate: MergedCandidate, confidence: n
           description: candidate.description,
           categories: candidate.categories ?? null,
           confidence: Math.max(confidence, existing.confidence),
-          needsReview: confidence < 70,
+          needsReview,
           updatedAt: now,
         })
         .where(eq(editions.id, editionId))
@@ -84,53 +107,111 @@ export function persistMergedCandidate(candidate: MergedCandidate, confidence: n
           description: candidate.description,
           categories: candidate.categories ?? null,
           confidence,
-          needsReview: confidence < 70,
+          needsReview,
         })
         .run();
     }
 
-    // 作者 & edition_contributors（位置保留，role 暂时全为 author）
-    for (let i = 0; i < candidate.authors.length; i++) {
-      const name = candidate.authors[i]!;
-      const normalizedName = normalizeAuthorName(name);
-      if (!normalizedName) continue;
-      let contrib = tx
-        .select()
-        .from(contributors)
-        .where(eq(contributors.normalizedName, normalizedName))
-        .get();
-      if (!contrib) {
-        const contribId = nanoid();
-        tx.insert(contributors).values({ id: contribId, name, normalizedName }).run();
-        contrib = { id: contribId } as typeof contributors.$inferSelect;
-      }
-      tx.insert(editionContributors)
-        .values({
-          editionId,
-          contributorId: contrib.id,
-          role: 'author',
-          position: i,
-        })
-        .onConflictDoNothing()
-        .run();
-    }
-
-    // sources（per source 一行，distinct 即可推 sources 列表）
-    for (const sourceName of candidate.sources) {
-      tx.insert(externalIdentifiers)
-        .values({
-          id: nanoid(),
-          editionId,
-          source: sourceName,
-          identifierType: 'source',
-          identifierValue: sourceName,
-        })
-        .onConflictDoNothing()
-        .run();
-    }
+    syncContributors(tx, editionId, collectContributors(candidate));
+    syncEditionSources(tx, editionId, candidate);
+    syncExternalIdentifiers(tx, editionId, workId, candidate);
 
     return editionId;
   });
+}
+
+function syncContributors(
+  tx: Parameters<Parameters<ReturnType<typeof getDb>['transaction']>[0]>[0],
+  editionId: string,
+  rows: ContributorRow[],
+): void {
+  tx.delete(editionContributors).where(eq(editionContributors.editionId, editionId)).run();
+
+  for (const { name, role, position } of rows) {
+    const normalizedName = normalizeAuthorName(name);
+    if (!normalizedName) continue;
+
+    tx.insert(contributors)
+      .values({ id: nanoid(), name, normalizedName })
+      .onConflictDoUpdate({
+        target: contributors.normalizedName,
+        set: { name },
+      })
+      .run();
+
+    const contrib = tx
+      .select()
+      .from(contributors)
+      .where(eq(contributors.normalizedName, normalizedName))
+      .get();
+    if (!contrib) continue;
+
+    tx.insert(editionContributors)
+      .values({
+        editionId,
+        contributorId: contrib.id,
+        role,
+        position,
+      })
+      .run();
+  }
+}
+
+function syncEditionSources(
+  tx: Parameters<Parameters<ReturnType<typeof getDb>['transaction']>[0]>[0],
+  editionId: string,
+  candidate: MergedCandidate,
+): void {
+  tx.delete(editionSources).where(eq(editionSources.editionId, editionId)).run();
+
+  for (const meta of candidate.sourceMeta) {
+    tx.insert(editionSources)
+      .values({
+        editionId,
+        source: meta.name,
+        externalId: meta.externalId ?? null,
+        externalUrl: meta.externalUrl ?? null,
+      })
+      .run();
+  }
+}
+
+function syncExternalIdentifiers(
+  tx: Parameters<Parameters<ReturnType<typeof getDb>['transaction']>[0]>[0],
+  editionId: string,
+  workId: string,
+  candidate: MergedCandidate,
+): void {
+  for (const ext of candidate.identifiers ?? []) {
+    const source = ext.source ?? candidate.sources[0] ?? 'unknown';
+    tx.insert(externalIdentifiers)
+      .values({
+        id: nanoid(),
+        editionId,
+        workId,
+        source,
+        identifierType: ext.type,
+        identifierValue: ext.value,
+      })
+      .onConflictDoNothing()
+      .run();
+  }
+
+  for (const meta of candidate.sourceMeta) {
+    if (!meta.externalId) continue;
+    tx.insert(externalIdentifiers)
+      .values({
+        id: nanoid(),
+        editionId,
+        workId,
+        source: meta.name,
+        identifierType: 'provider_id',
+        identifierValue: meta.externalId,
+        externalUrl: meta.externalUrl ?? null,
+      })
+      .onConflictDoNothing()
+      .run();
+  }
 }
 
 function createWork(

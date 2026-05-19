@@ -1,0 +1,266 @@
+{
+  "/Users/niunan/project/booknest/eslint.config.js": {
+    "mtime": 1779101473.4355118,
+    "hash": "4898208fe8f8c730200e8231805b475d"
+  },
+  "/Users/niunan/project/booknest/vitest.config.ts": {
+    "mtime": 1779101583.8104842,
+    "hash": "bf6da48f32236a366b5d7966968f0c47"
+  },
+  "/Users/niunan/project/booknest/scripts/record-fixture.ts": {
+    "mtime": 1779128158.114619,
+    "hash": "f4e0915d6ef9fd3ab806615ca950445e"
+  },
+  "/Users/niunan/project/booknest/packages/shared/src/isbn.test.ts": {
+    "mtime": 1779116904.1875107,
+    "hash": "70ce3451ac1458d6ed0bbe480dfaf1e5"
+  },
+  "/Users/niunan/project/booknest/packages/shared/src/normalize.test.ts": {
+    "mtime": 1779117019.582081,
+    "hash": "06e0115a6d6f67214721a3b8fa3ae432"
+  },
+  "/Users/niunan/project/booknest/packages/shared/src/types.ts": {
+    "mtime": 1779163849.9706001,
+    "hash": "d657da519bd90ec0b8b20adf05802e4a"
+  },
+  "/Users/niunan/project/booknest/packages/shared/src/isbn.ts": {
+    "mtime": 1779101777.7405066,
+    "hash": "d308ccb75f6847099b854949675d2e0a"
+  },
+  "/Users/niunan/project/booknest/packages/shared/src/normalize.ts": {
+    "mtime": 1779101825.1307364,
+    "hash": "a4e1be70543b32fe092e2340746cc962"
+  },
+  "/Users/niunan/project/booknest/packages/shared/src/index.ts": {
+    "mtime": 1779101833.2176237,
+    "hash": "331f52de9c3ec44d6ab542736df261f5"
+  },
+  "/Users/niunan/project/booknest/apps/api/drizzle.config.ts": {
+    "mtime": 1779101636.295265,
+    "hash": "de66b252272f9b625136ff48c6c683e9"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/server.ts": {
+    "mtime": 1779125429.193427,
+    "hash": "8a9a0b80b825d616fa2cd5788affb938"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/score.ts": {
+    "mtime": 1779163588.0747037,
+    "hash": "2bf7791d9bb84e524dd5a21aaa9e90aa"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/merge.test.ts": {
+    "mtime": 1779116984.209167,
+    "hash": "303f05fdffd1617982955cca4198744d"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/load.ts": {
+    "mtime": 1779163810.761896,
+    "hash": "d4f31d31ffb7c7200e4372afdc40fc4a"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/router.ts": {
+    "mtime": 1779163879.8468397,
+    "hash": "3e922be23c849d6cb75f073c29e939df"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/circuit-breaker.ts": {
+    "mtime": 1779118328.6686215,
+    "hash": "ecc80a892efdf74ee9f67b21ab226278"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/persist.test.ts": {
+    "mtime": 1779163898.6294272,
+    "hash": "8aa1384efcbe18f6a83f314b2fa70270"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/cache.ts": {
+    "mtime": 1779113696.7025015,
+    "hash": "f33be14ca489230da98b675fec40a3d3"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/score.test.ts": {
+    "mtime": 1779163643.7013144,
+    "hash": "e4f3f41218a334a8483fd4ed60db7d77"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/persist.ts": {
+    "mtime": 1779163807.203943,
+    "hash": "5175b77995d325fdd6f9dd8d3ba9d98f"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/rate-limit.ts": {
+    "mtime": 1779113703.0207455,
+    "hash": "16f85684a8899dcc5821bb70646e24f0"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/core/merge.ts": {
+    "mtime": 1779163814.6577299,
+    "hash": "58605e2688e1761609a7f6cce44b6ab8"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/config/providers.ts": {
+    "mtime": 1779161462.4047894,
+    "hash": "5a334e3ac73752a351520293dcf2aa33"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/config/env.ts": {
+    "mtime": 1779163881.6583793,
+    "hash": "b3c32bac8f5460dc2ef0c548b27bc96e"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/google-books/mapper.test.ts": {
+    "mtime": 1779116958.372805,
+    "hash": "22a431c1cb66deb6fb534059946e6186"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/google-books/types.ts": {
+    "mtime": 1779106185.9944084,
+    "hash": "b5a491254e2376f580350adab7538d56"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/google-books/mapper.ts": {
+    "mtime": 1779124274.2227905,
+    "hash": "ea2554fcdae5717b969d8ea038ba675d"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/google-books/index.ts": {
+    "mtime": 1779163868.032149,
+    "hash": "94bbf144343453e8ba3148897ae48c89"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/open-library/mapper.test.ts": {
+    "mtime": 1779116939.0045319,
+    "hash": "fd12edde90a0361688e0650d784c985e"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/open-library/types.ts": {
+    "mtime": 1779102114.2578146,
+    "hash": "d99344d9840dfa8ea32b644019911915"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/open-library/mapper.ts": {
+    "mtime": 1779102143.8063247,
+    "hash": "533e54808836825acb16bcd12590c208"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/open-library/index.ts": {
+    "mtime": 1779163863.236576,
+    "hash": "fb86935c86838c26f5b9943994508bca"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/loc/mapper.test.ts": {
+    "mtime": 1779128209.7411,
+    "hash": "56dddfa984b2026db4b151d35667086c"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/loc/types.ts": {
+    "mtime": 1779127974.94085,
+    "hash": "cf7fb1854568b135096caf6efcce5fe7"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/loc/mapper.ts": {
+    "mtime": 1779127986.7446895,
+    "hash": "dfe02daa99e9a7548528d18f122a7d93"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/loc/index.ts": {
+    "mtime": 1779163874.6255279,
+    "hash": "3dd6066f5c8aea649b2600cc9af07a3c"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/crossref/mapper.test.ts": {
+    "mtime": 1779128193.1080027,
+    "hash": "f6c4c07e98cd8b08ba52380cb5d180b3"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/crossref/types.ts": {
+    "mtime": 1779127933.7711112,
+    "hash": "e619e58d3bc1904632fb790f31e2f131"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/crossref/mapper.ts": {
+    "mtime": 1779127949.8004975,
+    "hash": "7247b5aad9ba141ce7621512d25f0285"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/crossref/index.ts": {
+    "mtime": 1779163871.5422575,
+    "hash": "38d81c45809ba7ebde0cc912fe42178b"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/commercial-isbn/types.ts": {
+    "mtime": 1779129680.953384,
+    "hash": "8456e9c559ac6d96352657a71e7ec2cf"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/commercial-isbn/presets.ts": {
+    "mtime": 1779129696.0389764,
+    "hash": "b8ef8271a53fddf7aeb070f8ab68b5a6"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/commercial-isbn/index.ts": {
+    "mtime": 1779163879.5044487,
+    "hash": "581fd3d94479b1f2e3a5381405337bf2"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/providers/commercial-isbn/presets.test.ts": {
+    "mtime": 1779129853.1734726,
+    "hash": "9c1c5e376374b713842fd8b12276a4e9"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/lib/http.ts": {
+    "mtime": 1779129741.782395,
+    "hash": "414857d8541fb267bc8fe0d2801908e3"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/db/schema.ts": {
+    "mtime": 1779163788.403783,
+    "hash": "bfc4d847b0ebd7ca2ba5fcaf61dd6f45"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/db/migrate.ts": {
+    "mtime": 1779117389.0100765,
+    "hash": "c7a172d419fe463cd8197d6b72a7930e"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/db/client.ts": {
+    "mtime": 1779101940.3100665,
+    "hash": "e35fbd4aaef4ffbdf0ce6337cf9b93d1"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/db/migrations/0002_edition_sources_contributors_uniq.sql": {
+    "mtime": 1779163792.8672137,
+    "hash": "206aba34d96a3fcde41352b239d3b547"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/db/migrations/0000_careful_glorian.sql": {
+    "mtime": 1779101987.56394,
+    "hash": "579438c2f87599bcf7cd02b4fca75433"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/db/migrations/0001_green_blackheart.sql": {
+    "mtime": 1779162558.0492325,
+    "hash": "4e6c495f3a952053c349c9c5f27c4e10"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/api/middleware/ip-rate-limit.ts": {
+    "mtime": 1779163884.0016751,
+    "hash": "2709ae9fa3ceaa63c5efe8e4ffe8b8bc"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/api/middleware/error.ts": {
+    "mtime": 1779113862.0633988,
+    "hash": "7eac9052504d341a70a23040b610a74a"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/api/routes/corrections.ts": {
+    "mtime": 1779163887.8136253,
+    "hash": "819cb1e894501a8936a9ea424cc2adda"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/api/routes/providers.ts": {
+    "mtime": 1779113877.0963697,
+    "hash": "42b3f4d36e4b1eaf1a31fccccf8b3a3e"
+  },
+  "/Users/niunan/project/booknest/apps/api/src/api/routes/books.ts": {
+    "mtime": 1779162968.7114873,
+    "hash": "79e6895d38df52052f71f5b1b2ebebc3"
+  },
+  "/Users/niunan/project/booknest/README.md": {
+    "mtime": 1779129878.8210175,
+    "hash": "78a4bd565512d5fdc753c900b19cb672"
+  },
+  "/Users/niunan/project/booknest/CONTRIBUTING.md": {
+    "mtime": 1779101373.8586967,
+    "hash": "a088df818f95e554d2ece800de667bc8"
+  },
+  "/Users/niunan/project/booknest/docker-compose.yml": {
+    "mtime": 1779117150.5878713,
+    "hash": "2dcd2413982446048dce57b71c35739a"
+  },
+  "/Users/niunan/project/booknest/booknest_design.md": {
+    "mtime": 1779100719.7837818,
+    "hash": "30e5a179b2d9b8cfb944b94ef22c19dc"
+  },
+  "/Users/niunan/project/booknest/CLAUDE.md": {
+    "mtime": 1779101423.4864087,
+    "hash": "ad0e57a9a9d9322401aa556e3daaf5b8"
+  },
+  "/Users/niunan/project/booknest/pnpm-workspace.yaml": {
+    "mtime": 1779101542.2192414,
+    "hash": "f5f68f0530f1523041e8467c1c46178d"
+  },
+  "/Users/niunan/project/booknest/docs/architecture.md": {
+    "mtime": 1779101222.1216416,
+    "hash": "b912dd17e5d3263293293fb5f01ea2e7"
+  },
+  "/Users/niunan/project/booknest/docs/api.md": {
+    "mtime": 1779101254.2664077,
+    "hash": "49477765daff53800c333df97a9bdc4f"
+  },
+  "/Users/niunan/project/booknest/docs/provider-policy.md": {
+    "mtime": 1779129912.682656,
+    "hash": "601baaa10aeb31ad23bf3113e8f381ad"
+  },
+  "/Users/niunan/project/booknest/apps/api/public/index.html": {
+    "mtime": 1779163919.8911247,
+    "hash": "e2c84e3f8230e60b46bbd88a824f3543"
+  }
+}

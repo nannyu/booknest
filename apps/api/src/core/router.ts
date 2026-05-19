@@ -18,6 +18,7 @@
 import { nanoid } from 'nanoid';
 import type {
   BookCandidate,
+  BookContributor,
   BookProvider,
   ProviderConfig,
   RankedBook,
@@ -28,6 +29,7 @@ import { env } from '../config/env.js';
 import { getEnabledProviders } from '../config/providers.js';
 import { getDb } from '../db/client.js';
 import { sourceSnapshots } from '../db/schema.js';
+import type { ProviderFetchResult } from '@booknest/shared';
 import { buildCacheKey, readCache, writeCache } from './cache.js';
 import { canCall, recordFailure, recordSuccess } from './circuit-breaker.js';
 import { mergeCandidates, type MergedCandidate } from './merge.js';
@@ -60,7 +62,7 @@ export async function searchBooks(query: SearchQuery): Promise<SearchResult> {
 
     const all: BookCandidate[] = [];
     for (const r of settled) {
-      if (r.status === 'fulfilled') all.push(...r.value);
+      if (r.status === 'fulfilled') all.push(...r.value.candidates);
     }
 
     const merged = mergeCandidates(all);
@@ -68,18 +70,18 @@ export async function searchBooks(query: SearchQuery): Promise<SearchResult> {
       .map((m) => ({ m, s: scoreCandidate(m, query) }))
       .sort((a, b) => b.s - a.s);
 
-    // 落库：每个候选 upsert 到 editions（连同 contributors / external_identifiers）。
-    // 失败不影响搜索响应，回退到 nanoid 作 id（前端刷新会拉不到，但当前 session 可用）。
     const ranked = scored.map(({ m, s }) => {
       let id: string;
+      let persisted = true;
       try {
         id = persistMergedCandidate(m, s);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.warn('[persist] failed:', (err as Error).message);
         id = nanoid();
+        persisted = false;
       }
-      return toRanked(m, s, id);
+      return toRanked(m, s, id, persisted);
     });
     applyReturnPolicy(query, scored, ranked);
 
@@ -110,7 +112,7 @@ async function fetchFromProvider(
   provider: BookProvider,
   query: SearchQuery,
   outerSignal: AbortSignal,
-): Promise<BookCandidate[]> {
+): Promise<ProviderFetchResult> {
   const cacheKey = buildCacheKey({
     provider: config.name,
     queryType: query.queryType,
@@ -119,11 +121,13 @@ async function fetchFromProvider(
   });
 
   const cached = readCache<BookCandidate[]>(cacheKey);
-  if (cached !== null) return cached;
+  if (cached !== null) {
+    return { candidates: cached, snapshot: null };
+  }
 
-  if (!canCall(config.name)) return [];
+  if (!canCall(config.name)) return { candidates: [], snapshot: null };
   ensureConfigured(config.name, config.rateLimitPerMinute);
-  if (!tryAcquire(config.name)) return [];
+  if (!tryAcquire(config.name)) return { candidates: [], snapshot: null };
 
   const ctrl = new AbortController();
   const timer = setTimeout(
@@ -134,19 +138,21 @@ async function fetchFromProvider(
   outerSignal.addEventListener('abort', onOuter, { once: true });
 
   try {
-    const cands = await callProvider(provider, query, ctrl.signal);
+    const outcome = await queryProvider(provider, query, ctrl.signal);
     recordSuccess(config.name);
-    recordSnapshot({
-      source: config.name,
-      queryType: query.queryType,
+    if (outcome.snapshot !== null) {
+      recordSnapshot({
+        source: config.name,
+        queryType: query.queryType,
+        query: cacheQueryString(query),
+        data: outcome.snapshot,
+      });
+    }
+    writeCache(cacheKey, outcome.candidates, config.cacheTtlDays, {
       query: cacheQueryString(query),
-      data: cands,
-    });
-    writeCache(cacheKey, cands, config.cacheTtlDays, {
-      query: cacheQueryString(query),
       queryType: query.queryType,
     });
-    return cands;
+    return outcome;
   } catch (e) {
     const msg = (e as Error).message;
     recordFailure(config.name, msg);
@@ -154,18 +160,18 @@ async function fetchFromProvider(
       query: cacheQueryString(query),
       queryType: query.queryType,
     });
-    return [];
+    return { candidates: [], snapshot: null };
   } finally {
     clearTimeout(timer);
     outerSignal.removeEventListener('abort', onOuter);
   }
 }
 
-async function callProvider(
+async function queryProvider(
   provider: BookProvider,
   query: SearchQuery,
   signal: AbortSignal,
-): Promise<BookCandidate[]> {
+): Promise<ProviderFetchResult> {
   if (query.queryType === 'isbn' && query.isbn) {
     return provider.searchByISBN(query.isbn, signal);
   }
@@ -179,7 +185,7 @@ async function callProvider(
       signal,
     );
   }
-  if (!query.title) return [];
+  if (!query.title) return { candidates: [], snapshot: null };
   return provider.searchByTitle(
     {
       title: query.title,
@@ -204,9 +210,8 @@ function recordSnapshot(input: {
   source: string;
   queryType: string;
   query: string;
-  data: BookCandidate[];
+  data: unknown;
 }): void {
-  if (input.data.length === 0) return;
   try {
     const db = getDb();
     db.insert(sourceSnapshots)
@@ -215,7 +220,7 @@ function recordSnapshot(input: {
         source: input.source,
         query: input.query,
         queryType: input.queryType,
-        responseJson: input.data as unknown as object,
+        responseJson: input.data as object,
       })
       .run();
   } catch (err) {
@@ -224,12 +229,28 @@ function recordSnapshot(input: {
   }
 }
 
-function toRanked(merged: MergedCandidate, score: number, id: string): RankedBook {
+function mergedContributors(m: MergedCandidate): BookContributor[] {
+  const out: BookContributor[] = m.authors.map((name) => ({ name, role: 'author' as const }));
+  for (const name of m.translators ?? []) {
+    out.push({ name, role: 'translator' });
+  }
+  for (const name of m.editors ?? []) {
+    out.push({ name, role: 'editor' });
+  }
+  return out;
+}
+
+function toRanked(
+  merged: MergedCandidate,
+  score: number,
+  id: string,
+  persisted: boolean,
+): RankedBook {
   return {
     id,
     title: merged.title,
     subtitle: merged.subtitle,
-    authors: merged.authors.map((name) => ({ name, role: 'author' as const })),
+    authors: mergedContributors(merged),
     publisher: merged.publisher,
     publishedDate: merged.publishedDate,
     isbn10: merged.isbn10,
@@ -241,8 +262,13 @@ function toRanked(merged: MergedCandidate, score: number, id: string): RankedBoo
     categories: merged.categories,
     confidence: score,
     recommended: false,
-    needsReview: false,
-    sources: merged.sources.map((name) => ({ name })),
+    needsReview: score < 70,
+    sources: merged.sourceMeta.map((s) => ({
+      name: s.name,
+      externalId: s.externalId,
+      externalUrl: s.externalUrl,
+    })),
+    ...(persisted ? {} : { ephemeral: true }),
   };
 }
 
@@ -260,8 +286,5 @@ function applyReturnPolicy(
     ranked[0]!.recommended = true;
   } else if (!isISBN && (second === undefined || top.s - second.s > 20)) {
     ranked[0]!.recommended = true;
-  }
-  if (isISBN && top.s < 70) {
-    ranked[0]!.needsReview = true;
   }
 }

@@ -1,15 +1,14 @@
 /**
  * Google Books Provider。
  * 默认启用，rate limit 60/min，cache 30 天。
- *
- * 接口：
- *   GET https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}
- *   GET https://www.googleapis.com/books/v1/volumes?q={query}&maxResults=...
- *
- * 可选 key：GOOGLE_BOOKS_API_KEY。无 key 走匿名配额（约 1000/day）。
  */
 
-import type { BookCandidate, BookProvider, SearchAuthorParams, SearchTitleParams } from '@booknest/shared';
+import type {
+  BookProvider,
+  ProviderFetchResult,
+  SearchAuthorParams,
+  SearchTitleParams,
+} from '@booknest/shared';
 import { env } from '../../config/env.js';
 import { fetchJson } from '../../lib/http.js';
 import { mapGBVolumeToCandidate } from './mapper.js';
@@ -30,17 +29,17 @@ function buildUrl(query: Record<string, string | number | undefined>): string {
 export class GoogleBooksProvider implements BookProvider {
   readonly name = 'google_books';
 
-  async searchByISBN(isbn: string, signal?: AbortSignal): Promise<BookCandidate[]> {
+  async searchByISBN(isbn: string, signal?: AbortSignal): Promise<ProviderFetchResult> {
     const url = buildUrl({ q: `isbn:${isbn}`, maxResults: 5 });
     const data = await fetchJson<GBVolumesResponse>(url, {
       provider: this.name,
       timeoutMs: 8000,
       signal,
     });
-    return mapItems(data);
+    return { candidates: mapItems(data), snapshot: data };
   }
 
-  async searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<BookCandidate[]> {
+  async searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<ProviderFetchResult> {
     const qParts = [`intitle:"${params.title}"`];
     if (params.author) qParts.push(`inauthor:"${params.author}"`);
     const url = buildUrl({
@@ -53,10 +52,10 @@ export class GoogleBooksProvider implements BookProvider {
       timeoutMs: 8000,
       signal,
     });
-    return mapItems(data);
+    return { candidates: mapItems(data), snapshot: data };
   }
 
-  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]> {
+  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<ProviderFetchResult> {
     const url = buildUrl({
       q: `inauthor:"${params.author}"`,
       maxResults: Math.min(params.limit ?? 20, 40),
@@ -67,13 +66,13 @@ export class GoogleBooksProvider implements BookProvider {
       timeoutMs: 8000,
       signal,
     });
-    return mapItems(data);
+    return { candidates: mapItems(data), snapshot: data };
   }
 }
 
-function mapItems(data: GBVolumesResponse): BookCandidate[] {
+function mapItems(data: GBVolumesResponse) {
   if (!data.items) return [];
-  return data.items.map(mapGBVolumeToCandidate).filter((c): c is BookCandidate => c !== null);
+  return data.items.map(mapGBVolumeToCandidate).filter((c): c is NonNullable<ReturnType<typeof mapGBVolumeToCandidate>> => c !== null);
 }
 
 function shortLang(s: string): string {

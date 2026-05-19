@@ -207,6 +207,7 @@
         if (book.confidence != null) confidenceLabel.push('置信度 ' + book.confidence + '%');
         if (book.recommended) confidenceLabel.push('推荐');
         if (book.needsReview) confidenceLabel.push('需审核');
+        if (book.ephemeral) confidenceLabel.push('未保存');
 
         const sourceTags = (book.sources || []).map(s =>
           `<span class="inline-block px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full border border-blue-100">${SOURCE_NAMES[s.name] || s.name}</span>`
@@ -275,6 +276,7 @@
                 ${book.confidence != null ? `<span class="inline-block px-2 py-0.5 text-xs rounded-full border ${confidenceClass}">置信度 ${book.confidence}%</span>` : ''}
                 ${book.recommended ? `<span class="inline-block px-2 py-0.5 bg-green-50 text-green-700 text-xs rounded-full border border-green-200">推荐</span>` : ''}
                 ${book.needsReview ? `<span class="inline-block px-2 py-0.5 bg-yellow-50 text-yellow-700 text-xs rounded-full border border-yellow-200">需审核</span>` : ''}
+                ${book.ephemeral ? `<span class="inline-block px-2 py-0.5 bg-orange-50 text-orange-700 text-xs rounded-full border border-orange-200">未持久化</span>` : ''}
               </div>
 
               ${meta ? `<div class="mt-5 space-y-2 text-sm">${meta}</div>` : ''}

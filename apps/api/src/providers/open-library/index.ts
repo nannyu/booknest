@@ -7,7 +7,12 @@
  *   GET https://openlibrary.org/search.json?q={query}&limit={n}
  */
 
-import type { BookCandidate, BookProvider, SearchAuthorParams, SearchTitleParams } from '@booknest/shared';
+import type {
+  BookProvider,
+  ProviderFetchResult,
+  SearchAuthorParams,
+  SearchTitleParams,
+} from '@booknest/shared';
 import { detectISBNFormat } from '@booknest/shared';
 import { fetchJson } from '../../lib/http.js';
 import { mapOLDocToCandidate } from './mapper.js';
@@ -46,7 +51,7 @@ function buildUrl(query: Record<string, string | number | undefined>): string {
 export class OpenLibraryProvider implements BookProvider {
   readonly name = 'open_library';
 
-  async searchByISBN(isbn: string, signal?: AbortSignal): Promise<BookCandidate[]> {
+  async searchByISBN(isbn: string, signal?: AbortSignal): Promise<ProviderFetchResult> {
     const url = buildUrl({
       q: `isbn:${isbn}`,
       fields: FIELDS,
@@ -58,19 +63,16 @@ export class OpenLibraryProvider implements BookProvider {
       signal,
     });
     const candidates = mapDocs(data);
-    // OL search 返回的是 work-merged 数据。把查询用的 ISBN 写回，
-    // 让上层合并/评分能正确按 ISBN 命中
     const format = detectISBNFormat(isbn);
     for (const c of candidates) {
       if (format === 'isbn13') c.isbn13 = isbn;
       else if (format === 'isbn10') c.isbn10 = isbn;
     }
-    return candidates;
+    return { candidates, snapshot: data };
   }
 
-  async searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<BookCandidate[]> {
+  async searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<ProviderFetchResult> {
     let q = params.author ? `${params.title} ${params.author}` : params.title;
-    // OL search.json 对 < 3 字符的查询返回 422；加 title: 前缀可规避
     if (Array.from(q).length < 3) {
       q = `title:${q}`;
     }
@@ -85,11 +87,10 @@ export class OpenLibraryProvider implements BookProvider {
       timeoutMs: 8000,
       signal,
     });
-    return mapDocs(data);
+    return { candidates: mapDocs(data), snapshot: data };
   }
 
-  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]> {
-    // 用 author 字段而不是 q=author:...，OL 对 author 字段做模糊匹配
+  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<ProviderFetchResult> {
     const url = buildUrl({
       author: params.author,
       fields: FIELDS,
@@ -101,17 +102,16 @@ export class OpenLibraryProvider implements BookProvider {
       timeoutMs: 8000,
       signal,
     });
-    return mapDocs(data);
+    return { candidates: mapDocs(data), snapshot: data };
   }
 }
 
-function mapDocs(data: OLSearchResponse): BookCandidate[] {
+function mapDocs(data: OLSearchResponse) {
   if (!data.docs) return [];
-  return data.docs.map(mapOLDocToCandidate).filter((c): c is BookCandidate => c !== null);
+  return data.docs.map(mapOLDocToCandidate).filter((c): c is NonNullable<ReturnType<typeof mapOLDocToCandidate>> => c !== null);
 }
 
 function olLangCode(iso6391: string): string | undefined {
-  // ISO 639-1 → OL 使用的 639-2/B
   const map: Record<string, string> = {
     zh: 'chi',
     en: 'eng',

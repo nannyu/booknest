@@ -60,9 +60,22 @@ const envSchema = z.object({
   S3_REGION: z.string().optional(),
   S3_ACCESS_KEY_ID: z.string().optional(),
   S3_SECRET_ACCESS_KEY: z.string().optional(),
+
+  // Corrections API abuse protection
+  CORRECTIONS_RATE_LIMIT_PER_MIN: z.coerce.number().int().positive().default(10),
 });
 
-const parsed = envSchema.safeParse(process.env);
+const envSchemaWithRules = envSchema.superRefine((data, ctx) => {
+  if (data.ENABLE_COMMERCIAL_ISBN && !data.COMMERCIAL_ISBN_API_KEY) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['COMMERCIAL_ISBN_API_KEY'],
+      message: 'COMMERCIAL_ISBN_API_KEY is required when ENABLE_COMMERCIAL_ISBN=true',
+    });
+  }
+});
+
+const parsed = envSchemaWithRules.safeParse(process.env);
 if (!parsed.success) {
   // eslint-disable-next-line no-console
   console.error('Invalid environment variables:', parsed.error.flatten().fieldErrors);

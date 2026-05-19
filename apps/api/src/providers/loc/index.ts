@@ -1,14 +1,13 @@
 /**
  * Library of Congress Provider。
- * 默认关闭。对英文书/公版书有价值，中文书覆盖弱。
- *
- * 接口：
- *   GET https://www.loc.gov/books/?q={query}&fo=json
- *
- * 无需 API key，在任意 LOC 搜索页后加 `?fo=json` 即可。
  */
 
-import type { BookCandidate, BookProvider, SearchAuthorParams, SearchTitleParams } from '@booknest/shared';
+import type {
+  BookProvider,
+  ProviderFetchResult,
+  SearchAuthorParams,
+  SearchTitleParams,
+} from '@booknest/shared';
 import { fetchJson } from '../../lib/http.js';
 import { mapLOCResultToCandidate } from './mapper.js';
 import type { LOCResponse } from './types.js';
@@ -18,17 +17,17 @@ const BASE = 'https://www.loc.gov/books';
 export class LOCProvider implements BookProvider {
   readonly name = 'loc';
 
-  async searchByISBN(isbn: string, signal?: AbortSignal): Promise<BookCandidate[]> {
+  async searchByISBN(isbn: string, signal?: AbortSignal): Promise<ProviderFetchResult> {
     const url = `${BASE}/?q=${encodeURIComponent(isbn)}&fo=json`;
     const data = await fetchJson<LOCResponse>(url, {
       provider: this.name,
       timeoutMs: 8000,
       signal,
     });
-    return mapItems(data);
+    return { candidates: mapItems(data), snapshot: data };
   }
 
-  async searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<BookCandidate[]> {
+  async searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<ProviderFetchResult> {
     const q = params.author ? `${params.title} ${params.author}` : params.title;
     const url = `${BASE}/?q=${encodeURIComponent(q)}&fo=json`;
     const data = await fetchJson<LOCResponse>(url, {
@@ -36,23 +35,22 @@ export class LOCProvider implements BookProvider {
       timeoutMs: 8000,
       signal,
     });
-    return mapItems(data);
+    return { candidates: mapItems(data), snapshot: data };
   }
 
-  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]> {
-    // LOC books 接口没有专门的 author 字段；用全文搜索 + 关键词
+  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<ProviderFetchResult> {
     const url = `${BASE}/?q=${encodeURIComponent(params.author)}&fo=json`;
     const data = await fetchJson<LOCResponse>(url, {
       provider: this.name,
       timeoutMs: 8000,
       signal,
     });
-    return mapItems(data);
+    return { candidates: mapItems(data), snapshot: data };
   }
 }
 
-function mapItems(data: LOCResponse): BookCandidate[] {
+function mapItems(data: LOCResponse) {
   const items = data.content?.results;
   if (!items || items.length === 0) return [];
-  return items.map(mapLOCResultToCandidate).filter((c): c is BookCandidate => c !== null);
+  return items.map(mapLOCResultToCandidate).filter((c): c is NonNullable<ReturnType<typeof mapLOCResultToCandidate>> => c !== null);
 }

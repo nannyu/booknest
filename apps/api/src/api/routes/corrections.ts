@@ -10,10 +10,15 @@ import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
 import { BookNestError } from '@booknest/shared';
+import { ipRateLimit } from '../middleware/ip-rate-limit.js';
+import { env } from '../../config/env.js';
 import { getDb } from '../../db/client.js';
-import { corrections } from '../../db/schema.js';
+import { corrections, editions, works } from '../../db/schema.js';
+import { eq } from 'drizzle-orm';
 
 const router = new Hono();
+
+router.use('*', ipRateLimit(env.CORRECTIONS_RATE_LIMIT_PER_MIN));
 
 const correctionSchema = z.object({
   targetType: z.enum(['edition', 'work']).default('edition'),
@@ -41,6 +46,19 @@ router.post('/', async (c) => {
   }
   const data = parsed.data;
   const db = getDb();
+
+  if (data.targetType === 'edition') {
+    const exists = db.select({ id: editions.id }).from(editions).where(eq(editions.id, data.targetId)).get();
+    if (!exists) {
+      throw new BookNestError('NOT_FOUND', `edition not found: ${data.targetId}`, 404);
+    }
+  } else {
+    const exists = db.select({ id: works.id }).from(works).where(eq(works.id, data.targetId)).get();
+    if (!exists) {
+      throw new BookNestError('NOT_FOUND', `work not found: ${data.targetId}`, 404);
+    }
+  }
+
   const id = nanoid();
   db.insert(corrections)
     .values({

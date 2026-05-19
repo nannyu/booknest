@@ -82,4 +82,50 @@ describe('scoreCandidate', () => {
     expect(s).toBeGreaterThanOrEqual(0);
     expect(s).toBeLessThanOrEqual(100);
   });
+
+  it('author-only search rewards exact author match', () => {
+    const q: SearchQuery = { raw: '刘慈欣', queryType: 'author', author: '刘慈欣' };
+    // 作者完全匹配 + 有 ISBN + 有封面 应该拿到高分
+    const c = cand({ isbn13: '9787536692930', coverUrl: 'https://x/cover.jpg' });
+    const s = scoreCandidate(c, q);
+    expect(s).toBeGreaterThan(60); // author 1.0 × 60 + 封面 3 = 63
+  });
+
+  it('author-only: ISBN presence is the tiebreaker', () => {
+    const q: SearchQuery = { raw: '刘慈欣', queryType: 'author', author: '刘慈欣' };
+    const withIsbn = cand({ isbn13: '9787536692930' });
+    const without = cand({});
+    expect(scoreCandidate(withIsbn, q)).toBeGreaterThan(scoreCandidate(without, q));
+  });
+
+  it('title weight is higher for title query than for isbn query', () => {
+    const c = cand({ title: '三体', isbn13: '9787536692930' });
+    const isbnQ: SearchQuery = {
+      raw: '9787536692930',
+      queryType: 'isbn',
+      isbn: '9787536692930',
+      title: '三体',
+    };
+    const titleQ: SearchQuery = { raw: '三体', queryType: 'title', title: '三体' };
+    // isbn query: title 占 20，title query 占 50；title query 的标题加分应该更多
+    const isbnScore = scoreCandidate(c, isbnQ);
+    const titleScore = scoreCandidate(c, titleQ);
+    // 但 isbn query 还有 +60 的 ISBN 命中，所以总分会比 title 高
+    expect(isbnScore).toBeGreaterThan(titleScore);
+    // 而 title query 的 title 部分单独看就比 isbn query 多 30
+    expect(titleScore).toBeGreaterThanOrEqual(50); // 三体↔三体 ≈ 1 × 50
+  });
+
+  it('title_author splits weight between title and author', () => {
+    const q: SearchQuery = {
+      raw: '刘慈欣 三体',
+      queryType: 'title_author',
+      title: '三体',
+      author: '刘慈欣',
+    };
+    // 标题 + 作者都完全匹配
+    const c = cand({ isbn13: '9787536692930' });
+    const s = scoreCandidate(c, q);
+    expect(s).toBeGreaterThan(55); // 30 + 30 = 60 - 0 + 0 ≈ 60
+  });
 });

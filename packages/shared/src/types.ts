@@ -82,6 +82,12 @@ export interface SearchAuthorParams {
   language?: string;
 }
 
+/** Provider 单次查询：候选列表 + 上游原始 JSON（供 source_snapshots）。 */
+export interface ProviderFetchResult {
+  candidates: BookCandidate[];
+  snapshot: unknown;
+}
+
 /**
  * Provider 必须实现的接口。
  *
@@ -95,11 +101,11 @@ export interface SearchAuthorParams {
 export interface BookProvider {
   readonly name: string;
 
-  searchByISBN(isbn: string, signal?: AbortSignal): Promise<BookCandidate[]>;
+  searchByISBN(isbn: string, signal?: AbortSignal): Promise<ProviderFetchResult>;
 
-  searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<BookCandidate[]>;
+  searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<ProviderFetchResult>;
 
-  searchByAuthor?(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]>;
+  searchByAuthor?(params: SearchAuthorParams, signal?: AbortSignal): Promise<ProviderFetchResult>;
 }
 
 export type ProviderRiskLevel = 'low' | 'medium' | 'high';
@@ -140,6 +146,8 @@ export interface RankedBook {
   recommended: boolean;
   needsReview: boolean;
   sources: Array<{ name: string; externalId?: string; externalUrl?: string }>;
+  /** 未写入 DB 时为 true（详情链接刷新会 404）。 */
+  ephemeral?: boolean;
 }
 
 /**

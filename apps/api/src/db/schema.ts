@@ -92,7 +92,27 @@ export const contributors = sqliteTable(
       .notNull(),
   },
   (t) => ({
-    normalizedNameIdx: index('idx_contributors_normalized_name').on(t.normalizedName),
+    normalizedNameUniq: uniqueIndex('uniq_contributors_normalized_name').on(t.normalizedName),
+  }),
+);
+
+/** Edition 命中的数据源（与 external_identifiers 中的 OLID/ISBN 等区分）。 */
+export const editionSources = sqliteTable(
+  'edition_sources',
+  {
+    editionId: text('edition_id')
+      .notNull()
+      .references(() => editions.id),
+    source: text('source').notNull(),
+    externalId: text('external_id'),
+    externalUrl: text('external_url'),
+    createdAt: text('created_at')
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.editionId, t.source] }),
+    editionIdx: index('idx_edition_sources_edition').on(t.editionId),
   }),
 );
 
@@ -246,4 +266,5 @@ export type NewSourceSnapshot = typeof sourceSnapshots.$inferInsert;
 export type CorrectionRow = typeof corrections.$inferSelect;
 export type NewCorrection = typeof corrections.$inferInsert;
 export type CoverRow = typeof covers.$inferSelect;
+export type EditionSourceRow = typeof editionSources.$inferSelect;
 export type ProviderHealthRow = typeof providerHealth.$inferSelect;
