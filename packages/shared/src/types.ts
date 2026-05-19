@@ -55,7 +55,7 @@ export interface BookCandidate {
   raw: unknown;
 }
 
-export type QueryType = 'isbn' | 'title' | 'title_author';
+export type QueryType = 'isbn' | 'title' | 'title_author' | 'author';
 
 export interface SearchQuery {
   raw: string;
@@ -76,6 +76,12 @@ export interface SearchTitleParams {
   language?: string;
 }
 
+export interface SearchAuthorParams {
+  author: string;
+  limit?: number;
+  language?: string;
+}
+
 /**
  * Provider 必须实现的接口。
  *
@@ -83,6 +89,8 @@ export interface SearchTitleParams {
  * - 不要在这里访问数据库 / 缓存（caller 负责）
  * - 失败要 throw，不要静默返 []
  * - timeout 由 caller 用 AbortSignal 控制
+ *
+ * searchByAuthor 是 optional —— 上游服务不支持按作者搜索时可不实现。
  */
 export interface BookProvider {
   readonly name: string;
@@ -90,6 +98,8 @@ export interface BookProvider {
   searchByISBN(isbn: string, signal?: AbortSignal): Promise<BookCandidate[]>;
 
   searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<BookCandidate[]>;
+
+  searchByAuthor?(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]>;
 }
 
 export type ProviderRiskLevel = 'low' | 'medium' | 'high';
@@ -101,6 +111,7 @@ export interface ProviderConfig {
   riskLevel: ProviderRiskLevel;
   supportsISBN: boolean;
   supportsTitleSearch: boolean;
+  supportsAuthorSearch?: boolean;
   supportsCover: boolean;
   rateLimitPerMinute: number;
   cacheTtlDays: number;

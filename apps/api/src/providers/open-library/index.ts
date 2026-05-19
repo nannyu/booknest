@@ -7,7 +7,7 @@
  *   GET https://openlibrary.org/search.json?q={query}&limit={n}
  */
 
-import type { BookCandidate, BookProvider, SearchTitleParams } from '@booknest/shared';
+import type { BookCandidate, BookProvider, SearchAuthorParams, SearchTitleParams } from '@booknest/shared';
 import { detectISBNFormat } from '@booknest/shared';
 import { fetchJson } from '../../lib/http.js';
 import { mapOLDocToCandidate } from './mapper.js';
@@ -78,6 +78,22 @@ export class OpenLibraryProvider implements BookProvider {
       q,
       fields: FIELDS,
       limit: params.limit ?? 10,
+      ...(params.language ? { language: olLangCode(params.language) } : {}),
+    });
+    const data = await fetchJson<OLSearchResponse>(url, {
+      provider: this.name,
+      timeoutMs: 8000,
+      signal,
+    });
+    return mapDocs(data);
+  }
+
+  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]> {
+    // 用 author 字段而不是 q=author:...，OL 对 author 字段做模糊匹配
+    const url = buildUrl({
+      author: params.author,
+      fields: FIELDS,
+      limit: params.limit ?? 20,
       ...(params.language ? { language: olLangCode(params.language) } : {}),
     });
     const data = await fetchJson<OLSearchResponse>(url, {

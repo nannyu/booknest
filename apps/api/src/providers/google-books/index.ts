@@ -9,7 +9,7 @@
  * 可选 key：GOOGLE_BOOKS_API_KEY。无 key 走匿名配额（约 1000/day）。
  */
 
-import type { BookCandidate, BookProvider, SearchTitleParams } from '@booknest/shared';
+import type { BookCandidate, BookProvider, SearchAuthorParams, SearchTitleParams } from '@booknest/shared';
 import { env } from '../../config/env.js';
 import { fetchJson } from '../../lib/http.js';
 import { mapGBVolumeToCandidate } from './mapper.js';
@@ -46,6 +46,20 @@ export class GoogleBooksProvider implements BookProvider {
     const url = buildUrl({
       q: qParts.join(' '),
       maxResults: Math.min(params.limit ?? 10, 40),
+      ...(params.language ? { langRestrict: shortLang(params.language) } : {}),
+    });
+    const data = await fetchJson<GBVolumesResponse>(url, {
+      provider: this.name,
+      timeoutMs: 8000,
+      signal,
+    });
+    return mapItems(data);
+  }
+
+  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]> {
+    const url = buildUrl({
+      q: `inauthor:"${params.author}"`,
+      maxResults: Math.min(params.limit ?? 20, 40),
       ...(params.language ? { langRestrict: shortLang(params.language) } : {}),
     });
     const data = await fetchJson<GBVolumesResponse>(url, {

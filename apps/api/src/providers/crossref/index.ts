@@ -12,7 +12,7 @@
  * - 无需 API key，但 polite pool 要求在 UA 里带 mailto
  */
 
-import type { BookCandidate, BookProvider, SearchTitleParams } from '@booknest/shared';
+import type { BookCandidate, BookProvider, SearchAuthorParams, SearchTitleParams } from '@booknest/shared';
 import { fetchJson } from '../../lib/http.js';
 import { mapCrossrefWorkToCandidate } from './mapper.js';
 import type { CrossrefWorksResponse } from './types.js';
@@ -35,6 +35,16 @@ export class CrossrefProvider implements BookProvider {
   async searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<BookCandidate[]> {
     const q = params.author ? `${params.title} ${params.author}` : params.title;
     const url = `${BASE}?query.title=${encodeURIComponent(q)}&rows=${Math.min(params.limit ?? 10, 20)}`;
+    const data = await fetchJson<CrossrefWorksResponse>(url, {
+      provider: this.name,
+      timeoutMs: 8000,
+      signal,
+    });
+    return mapItems(data);
+  }
+
+  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]> {
+    const url = `${BASE}?query.author=${encodeURIComponent(params.author)}&rows=${Math.min(params.limit ?? 20, 20)}`;
     const data = await fetchJson<CrossrefWorksResponse>(url, {
       provider: this.name,
       timeoutMs: 8000,

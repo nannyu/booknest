@@ -8,7 +8,7 @@
  * 无需 API key，在任意 LOC 搜索页后加 `?fo=json` 即可。
  */
 
-import type { BookCandidate, BookProvider, SearchTitleParams } from '@booknest/shared';
+import type { BookCandidate, BookProvider, SearchAuthorParams, SearchTitleParams } from '@booknest/shared';
 import { fetchJson } from '../../lib/http.js';
 import { mapLOCResultToCandidate } from './mapper.js';
 import type { LOCResponse } from './types.js';
@@ -31,6 +31,17 @@ export class LOCProvider implements BookProvider {
   async searchByTitle(params: SearchTitleParams, signal?: AbortSignal): Promise<BookCandidate[]> {
     const q = params.author ? `${params.title} ${params.author}` : params.title;
     const url = `${BASE}/?q=${encodeURIComponent(q)}&fo=json`;
+    const data = await fetchJson<LOCResponse>(url, {
+      provider: this.name,
+      timeoutMs: 8000,
+      signal,
+    });
+    return mapItems(data);
+  }
+
+  async searchByAuthor(params: SearchAuthorParams, signal?: AbortSignal): Promise<BookCandidate[]> {
+    // LOC books 接口没有专门的 author 字段；用全文搜索 + 关键词
+    const url = `${BASE}/?q=${encodeURIComponent(params.author)}&fo=json`;
     const data = await fetchJson<LOCResponse>(url, {
       provider: this.name,
       timeoutMs: 8000,

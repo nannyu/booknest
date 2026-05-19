@@ -22,7 +22,7 @@ const books = new Hono();
 
 const searchSchema = z.object({
   q: z.string().min(1).max(200),
-  type: z.enum(['isbn', 'title', 'title_author']).optional(),
+  type: z.enum(['isbn', 'title', 'title_author', 'author']).optional(),
   limit: z.coerce.number().int().positive().max(50).optional(),
   language: z.string().optional(),
 });
@@ -47,6 +47,8 @@ books.get('/search', async (c) => {
       throw new BookNestError('INVALID_ISBN', `not a valid ISBN: ${q}`, 400);
     }
     query = { raw: q, queryType, isbn, limit, language };
+  } else if (queryType === 'author') {
+    query = { raw: q, queryType, author: q, limit, language };
   } else if (queryType === 'title_author') {
     const split = splitTitleAuthor(q);
     query = {

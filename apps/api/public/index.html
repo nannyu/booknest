@@ -20,8 +20,16 @@
 
     <!-- Search -->
     <div class="flex gap-2 mb-6">
+      <select id="type"
+        class="px-3 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="">自动检测</option>
+        <option value="isbn">按 ISBN</option>
+        <option value="title">按书名</option>
+        <option value="author">按作者</option>
+        <option value="title_author">作者+书名</option>
+      </select>
       <input id="q" type="text"
-        placeholder="输入 ISBN（如 9787536692930）或书名（如 三体）..."
+        placeholder="输入 ISBN（如 9787536692930）、书名（如 三体）或作者（如 刘慈欣）..."
         class="flex-1 px-4 py-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
       <button id="btn" onclick="search()"
         class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-sm transition-colors">
@@ -57,10 +65,14 @@
       const q = qInput.value.trim();
       if (!q) return;
 
+      const type = document.getElementById('type').value;
+      const params = new URLSearchParams({ q, limit: '10' });
+      if (type) params.set('type', type);
+
       setState('loading');
 
       try {
-        const res = await fetch('/api/books/search?q=' + encodeURIComponent(q) + '&limit=10');
+        const res = await fetch('/api/books/search?' + params.toString());
         const data = await res.json();
 
         if (!res.ok || data.error) {

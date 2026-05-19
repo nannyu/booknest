@@ -47,9 +47,11 @@ export async function searchBooks(query: SearchQuery): Promise<SearchResult> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(new Error('global-timeout')), GLOBAL_TIMEOUT_MS);
   try {
-    const enabled = getEnabledProviders().filter((p) =>
-      query.queryType === 'isbn' ? p.config.supportsISBN : p.config.supportsTitleSearch,
-    );
+    const enabled = getEnabledProviders().filter((p) => {
+      if (query.queryType === 'isbn') return p.config.supportsISBN;
+      if (query.queryType === 'author') return p.config.supportsAuthorSearch === true;
+      return p.config.supportsTitleSearch;
+    });
 
     const settled = await Promise.allSettled(
       enabled.map((e) => fetchFromProvider(e.config, e.provider, query, ctrl.signal)),
@@ -78,6 +80,9 @@ export async function searchBooks(query: SearchQuery): Promise<SearchResult> {
 function validateQuery(query: SearchQuery): void {
   if (query.queryType === 'isbn' && !query.isbn) {
     throw new BookNestError('INVALID_QUERY', 'ISBN query requires isbn field', 400);
+  }
+  if (query.queryType === 'author' && !query.author) {
+    throw new BookNestError('INVALID_QUERY', 'author query requires author field', 400);
   }
   if (
     (query.queryType === 'title' || query.queryType === 'title_author') &&
@@ -151,6 +156,16 @@ async function callProvider(
   if (query.queryType === 'isbn' && query.isbn) {
     return provider.searchByISBN(query.isbn, signal);
   }
+  if (query.queryType === 'author' && query.author && provider.searchByAuthor) {
+    return provider.searchByAuthor(
+      {
+        author: query.author,
+        limit: query.limit ?? 20,
+        language: query.language,
+      },
+      signal,
+    );
+  }
   if (!query.title) return [];
   return provider.searchByTitle(
     {
@@ -165,6 +180,7 @@ async function callProvider(
 
 function cacheQueryString(query: SearchQuery): string {
   if (query.queryType === 'isbn') return query.isbn ?? query.raw;
+  if (query.queryType === 'author') return `author:${query.author ?? query.raw}`;
   if (query.queryType === 'title_author') {
     return [query.title, query.author].filter(Boolean).join('|');
   }
