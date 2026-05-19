@@ -32,7 +32,7 @@ pnpm install
 # 初始化数据库
 pnpm db:migrate
 
-# 启动开发服务器
+# 启动开发服务器（会自动构建前端 CSS，不依赖 Tailwind CDN）
 pnpm dev
 
 # 服务默认监听 http://localhost:3000

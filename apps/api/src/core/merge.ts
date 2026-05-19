@@ -44,13 +44,16 @@ function isPresent(v: unknown): boolean {
   return true;
 }
 
-function groupKey(c: BookCandidate): string {
+/** 无 ISBN 时的分组键：标题 + 作者 + 出版社 + 语言 + 首译者（避免误合并）。 */
+export function groupKey(c: BookCandidate): string {
   if (c.isbn13) return `isbn13:${c.isbn13}`;
   if (c.isbn10) return `isbn10:${c.isbn10}`;
   const nt = normalizeChineseTitle(c.title);
   const author = c.authors[0] ? normalizeAuthorName(c.authors[0]) : '';
   const publisher = (c.publisher ?? '').toLowerCase().replace(/\s+/g, '');
-  return `t:${nt}|a:${author}|p:${publisher}`;
+  const language = (c.language ?? '').toLowerCase();
+  const translator = c.translators?.[0] ? normalizeAuthorName(c.translators[0]) : '';
+  return `t:${nt}|a:${author}|p:${publisher}|l:${language}|tr:${translator}`;
 }
 
 function pickField<K extends keyof BookCandidate>(

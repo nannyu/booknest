@@ -46,6 +46,7 @@ docs/             ← 架构 / API / Provider 策略
 - **Work ≠ Edition**：作品 vs 版本。译者不同、出版社不同、ISBN 不同 → 不同 Edition
 - **ISBN 是 Edition 的标识，不是 Work 的标识**
 - **不要把同 Work 不同 Edition 强行合并到一行**
+- **Work 关联**：`persist` 按 `normalizedTitle + 第一作者` 复用 `work_id`；不同 ISBN/出版社/译者仍是独立 Edition
 
 ### 流程铁律
 

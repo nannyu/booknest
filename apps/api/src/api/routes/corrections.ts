@@ -10,6 +10,7 @@ import { Hono } from 'hono';
 import { nanoid } from 'nanoid';
 import { z } from 'zod';
 import { BookNestError } from '@booknest/shared';
+import { correctionsAuth } from '../middleware/corrections-auth.js';
 import { ipRateLimit } from '../middleware/ip-rate-limit.js';
 import { env } from '../../config/env.js';
 import { getDb } from '../../db/client.js';
@@ -19,6 +20,7 @@ import { eq } from 'drizzle-orm';
 const router = new Hono();
 
 router.use('*', ipRateLimit(env.CORRECTIONS_RATE_LIMIT_PER_MIN));
+router.use('*', correctionsAuth);
 
 const correctionSchema = z.object({
   targetType: z.enum(['edition', 'work']).default('edition'),

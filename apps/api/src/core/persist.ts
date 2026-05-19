@@ -1,8 +1,9 @@
 /**
  * 合并候选 → DB 持久化（works / editions / contributors / edition_sources / external_identifiers）。
  *
- * v0.1 简化策略：
- * - 每个新 Edition 创建独立 Work（v0.2 再做 work 聚类）
+ * Work 关联（v0.1.1）：
+ * - 同 normalizedTitle + 第一作者 → 复用已有 Work
+ * - 不同 ISBN / 出版社 / 译者 → 仍各为独立 Edition
  * - 按 ISBN-13、ISBN-10 顺序匹配已有 Edition；无则插入
  * - 字段直接覆盖（candidate 总是当前合并的最新结果）
  *
@@ -23,6 +24,7 @@ import {
   works,
 } from '../db/schema.js';
 import type { MergedCandidate } from './merge.js';
+import { findWorkForCandidate } from './work-link.js';
 
 interface ContributorRow {
   name: string;
@@ -45,7 +47,15 @@ function collectContributors(candidate: MergedCandidate): ContributorRow[] {
   return rows;
 }
 
-export function persistMergedCandidate(candidate: MergedCandidate, confidence: number): string {
+export interface PersistResult {
+  editionId: string;
+  workId: string;
+}
+
+export function persistMergedCandidate(
+  candidate: MergedCandidate,
+  confidence: number,
+): PersistResult {
   const db = getDb();
 
   return db.transaction((tx) => {
@@ -65,7 +75,7 @@ export function persistMergedCandidate(candidate: MergedCandidate, confidence: n
 
     if (existing) {
       editionId = existing.id;
-      workId = existing.workId ?? createWork(tx, candidate, normalizedTitle);
+      workId = existing.workId ?? findOrCreateWork(tx, candidate, normalizedTitle);
       tx.update(editions)
         .set({
           workId,
@@ -88,7 +98,7 @@ export function persistMergedCandidate(candidate: MergedCandidate, confidence: n
         .where(eq(editions.id, editionId))
         .run();
     } else {
-      workId = createWork(tx, candidate, normalizedTitle);
+      workId = findOrCreateWork(tx, candidate, normalizedTitle);
       editionId = nanoid();
       tx.insert(editions)
         .values({
@@ -116,7 +126,7 @@ export function persistMergedCandidate(candidate: MergedCandidate, confidence: n
     syncEditionSources(tx, editionId, candidate);
     syncExternalIdentifiers(tx, editionId, workId, candidate);
 
-    return editionId;
+    return { editionId, workId };
   });
 }
 
@@ -214,11 +224,27 @@ function syncExternalIdentifiers(
   }
 }
 
-function createWork(
+function findOrCreateWork(
   tx: Parameters<Parameters<ReturnType<typeof getDb>['transaction']>[0]>[0],
   candidate: MergedCandidate,
   normalizedTitle: string,
 ): string {
+  const existingId = findWorkForCandidate(tx, normalizedTitle, candidate);
+  if (existingId) {
+    const now = new Date().toISOString();
+    tx.update(works)
+      .set({
+        canonicalTitle: candidate.title,
+        subtitle: candidate.subtitle,
+        description: candidate.description,
+        language: candidate.language,
+        updatedAt: now,
+      })
+      .where(eq(works.id, existingId))
+      .run();
+    return existingId;
+  }
+
   const workId = nanoid();
   tx.insert(works)
     .values({

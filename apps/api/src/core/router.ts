@@ -71,17 +71,8 @@ export async function searchBooks(query: SearchQuery): Promise<SearchResult> {
       .sort((a, b) => b.s - a.s);
 
     const ranked = scored.map(({ m, s }) => {
-      let id: string;
-      let persisted = true;
-      try {
-        id = persistMergedCandidate(m, s);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.warn('[persist] failed:', (err as Error).message);
-        id = nanoid();
-        persisted = false;
-      }
-      return toRanked(m, s, id, persisted);
+      const { id, workId, persisted } = persistWithRetry(m, s);
+      return toRanked(m, s, id, workId, persisted);
     });
     applyReturnPolicy(query, scored, ranked);
 
@@ -90,6 +81,23 @@ export async function searchBooks(query: SearchQuery): Promise<SearchResult> {
   } finally {
     clearTimeout(timer);
   }
+}
+
+function persistWithRetry(
+  m: MergedCandidate,
+  score: number,
+): { id: string; workId?: string; persisted: boolean } {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const { editionId, workId } = persistMergedCandidate(m, score);
+      return { id: editionId, workId, persisted: true };
+    } catch (err) {
+      if (attempt === 0) continue;
+      // eslint-disable-next-line no-console
+      console.warn('[persist] failed after retry:', (err as Error).message);
+    }
+  }
+  return { id: nanoid(), persisted: false };
 }
 
 function validateQuery(query: SearchQuery): void {
@@ -244,10 +252,12 @@ function toRanked(
   merged: MergedCandidate,
   score: number,
   id: string,
+  workId: string | undefined,
   persisted: boolean,
 ): RankedBook {
   return {
     id,
+    workId,
     title: merged.title,
     subtitle: merged.subtitle,
     authors: mergedContributors(merged),

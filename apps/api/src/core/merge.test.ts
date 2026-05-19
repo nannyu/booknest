@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { BookCandidate } from '@booknest/shared';
-import { mergeCandidates } from './merge.js';
+import { groupKey, mergeCandidates } from './merge.js';
 
 function ol(over: Partial<BookCandidate> = {}): BookCandidate {
   return {
@@ -90,5 +90,37 @@ describe('mergeCandidates', () => {
     const out = mergeCandidates([gb(), ol()]);
     // FIELD_PRIORITY.title 把 google_books 排在 open_library 前
     expect(out[0]!.sources).toEqual(['google_books', 'open_library']);
+  });
+
+  it('does not merge no-ISBN rows with different publishers', () => {
+    const out = mergeCandidates([
+      ol({ isbn13: undefined, isbn10: undefined, title: '三体', publisher: 'A社' }),
+      gb({ isbn13: undefined, isbn10: undefined, title: '三体', publisher: 'B社' }),
+    ]);
+    expect(out).toHaveLength(2);
+  });
+
+  it('does not merge no-ISBN rows with different translators', () => {
+    const out = mergeCandidates([
+      ol({
+        isbn13: undefined,
+        isbn10: undefined,
+        title: '三体',
+        translators: ['刘宇昆'],
+      }),
+      gb({
+        isbn13: undefined,
+        isbn10: undefined,
+        title: '三体',
+        translators: ['Ken Liu'],
+      }),
+    ]);
+    expect(out).toHaveLength(2);
+  });
+
+  it('groupKey differs when language differs', () => {
+    expect(
+      groupKey(ol({ isbn13: undefined, isbn10: undefined, language: 'zh' })),
+    ).not.toBe(groupKey(ol({ isbn13: undefined, isbn10: undefined, language: 'en' })));
   });
 });

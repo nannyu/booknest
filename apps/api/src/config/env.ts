@@ -63,6 +63,8 @@ const envSchema = z.object({
 
   // Corrections API abuse protection
   CORRECTIONS_RATE_LIMIT_PER_MIN: z.coerce.number().int().positive().default(10),
+  /** 设置后 POST /api/corrections 须带请求头 X-Booknest-Api-Key */
+  CORRECTIONS_API_KEY: z.string().min(8).optional(),
 });
 
 const envSchemaWithRules = envSchema.superRefine((data, ctx) => {
