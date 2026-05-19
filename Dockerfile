@@ -29,4 +29,4 @@ VOLUME ["/app/data"]
 
 # tini 转发信号；--import=tsx/esm 让 Node 直接跑 .ts
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["sh", "-c", "node --import=tsx/esm apps/api/src/db/migrate.ts && node --import=tsx/esm apps/api/src/server.ts"]
+CMD ["sh", "-c", "pnpm --filter @booknest/api build:css && node --import=tsx/esm apps/api/src/db/migrate.ts && node --import=tsx/esm apps/api/src/server.ts"]

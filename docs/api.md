@@ -1,18 +1,17 @@
 # API 参考
 
-> Base URL: `http://localhost:3000` (默认)。所有 JSON 响应都使用 UTF-8 编码。
+> Base URL: `http://localhost:3000`（默认）。所有 JSON 响应使用 UTF-8。
 
 ## 通用约定
 
-### 响应包装
-
-成功响应直接返回数据对象。错误响应：
+### 错误响应
 
 ```json
 {
   "error": {
     "code": "INVALID_ISBN",
-    "message": "ISBN 校验失败：长度不对"
+    "message": "not a valid ISBN: xxx",
+    "details": {}
   }
 }
 ```
@@ -22,53 +21,57 @@
 | 状态 | 含义 |
 |---|---|
 | 200 | 成功 |
-| 400 | 参数错误（ISBN 格式、缺参数等） |
-| 404 | 未找到（Edition、Work） |
-| 429 | 上游 Provider 限流 |
-| 503 | 所有 Provider 都失败且无缓存 |
+| 201 | 已创建（如 corrections） |
+| 400 | 参数错误 |
+| 401 | 未授权（corrections 配置了 API Key 时） |
+| 404 | Edition / Work 不存在 |
+| 413 | 请求体过大 |
+| 429 | 限流（上游 Provider 或 corrections IP 限流） |
+| 502 / 504 | 上游 Provider 错误 / 超时 |
+
+---
 
 ## 1. 搜索图书
 
 ```http
-GET /api/books/search?q={query}&limit={n}&language={lang}
+GET /api/books/search?q={query}&type={type}&limit={n}&language={lang}
 ```
 
 | 参数 | 类型 | 必填 | 默认 | 说明 |
 |---|---|---|---|---|
-| `q` | string | ✓ | — | 书名、ISBN、或 "作者 书名" |
-| `limit` | int | | 10 | 候选数上限，最大 50 |
-| `language` | string | | — | ISO 639-1，如 `zh` / `en` |
+| `q` | string | ✓ | — | ISBN、书名、作者或「作者+书名」 |
+| `type` | string | | 自动检测 | `isbn` / `title` / `title_author` / `author` |
+| `limit` | int | | 20 | 最大 50 |
+| `language` | string | | — | ISO 639-1，如 `zh` |
 
 **示例**
 
 ```bash
 curl 'http://localhost:3000/api/books/search?q=三体&limit=5'
+curl 'http://localhost:3000/api/books/search?q=刘慈欣&type=author&limit=10'
 ```
 
 **响应**
 
 ```json
 {
-  "query": "三体",
-  "queryType": "title",
+  "query": {
+    "raw": "三体",
+    "queryType": "title",
+    "title": "三体",
+    "limit": 5
+  },
   "results": [
     {
-      "id": "edition_01HXYZ",
-      "workId": "work_01HXYZ",
+      "id": "abc123",
+      "workId": "work_xyz",
       "title": "三体",
-      "subtitle": null,
       "authors": [{ "name": "刘慈欣", "role": "author" }],
-      "publisher": "重庆出版社",
-      "publishedDate": "2008",
-      "isbn10": "7536692935",
       "isbn13": "9787536692930",
-      "language": "zh",
-      "pageCount": 302,
-      "coverUrl": "https://covers.openlibrary.org/b/isbn/9787536692930-L.jpg",
-      "description": "...",
-      "confidence": 94,
+      "confidence": 85,
       "recommended": true,
       "needsReview": false,
+      "ephemeral": false,
       "sources": [
         { "name": "google_books", "externalId": "..." },
         { "name": "open_library", "externalId": "..." }
@@ -78,13 +81,22 @@ curl 'http://localhost:3000/api/books/search?q=三体&limit=5'
 }
 ```
 
-**queryType 自动识别**
-
-| 输入特征 | queryType |
+| 字段 | 说明 |
 |---|---|
-| 仅数字（10/13 位） | `isbn` |
-| 单个词或短语 | `title` |
-| 包含空格、能拆出可能作者 | `title_author` |
+| `workId` | 作品 ID；同书不同 ISBN 可共享 |
+| `recommended` | 系统推荐的首条候选 |
+| `needsReview` | `confidence < 70` 时建议人工核对 |
+| `ephemeral` | `true` 表示未写入 DB，详情深链刷新会 404 |
+
+**queryType 自动检测（未传 `type` 时）**
+
+| 输入 | queryType |
+|---|---|
+| 10/13 位 ISBN | `isbn` |
+| 可拆为「作者 + 书名」 | `title_author` |
+| 其他 | `title` |
+
+---
 
 ## 2. ISBN 精确查询
 
@@ -92,79 +104,90 @@ curl 'http://localhost:3000/api/books/search?q=三体&limit=5'
 GET /api/books/isbn/{isbn}
 ```
 
-ISBN 自动清洗：去掉空格、连字符、`ISBN` 前缀、全角字符。
-
-**示例**
+ISBN 自动规范化（去连字符、空格等）。
 
 ```bash
-curl http://localhost:3000/api/books/isbn/978-7-5366-9293-0
-# 等价于
 curl http://localhost:3000/api/books/isbn/9787536692930
 ```
 
-**响应**：与搜索结果中单条 Edition 结构一致。`needsReview: true` 表示多源返回字段冲突大，建议人工核对。
+**响应**：与搜索相同结构 `{ query, results }`，默认 `limit=5`。
 
-## 3. 获取图书详情
+---
+
+## 3. 图书详情
 
 ```http
 GET /api/books/{editionId}
 ```
 
-返回完整的 Edition 数据，包含 Work 信息、所有贡献者、所有 source_snapshots 摘要。
+从本地 DB 加载已持久化的 Edition（含贡献者角色、各数据源 externalId）。
+
+```json
+{
+  "result": {
+    "id": "abc123",
+    "workId": "work_xyz",
+    "title": "三体",
+    "authors": [
+      { "name": "刘慈欣", "role": "author" },
+      { "name": "Ken Liu", "role": "translator" }
+    ],
+    "confidence": 85,
+    "needsReview": false,
+    "recommended": false,
+    "sources": [{ "name": "open_library", "externalId": "OL..." }]
+  }
+}
+```
+
+> 原始 Provider 响应在 `source_snapshots` 表，供运维/debug；当前 HTTP 接口不返回快照列表（v0.2 可考虑）。
+
+---
 
 ## 4. 提交修正
 
 ```http
-POST /api/books/{editionId}/corrections
+POST /api/corrections
 Content-Type: application/json
 ```
+
+可选：在 `.env` 设置 `CORRECTIONS_API_KEY` 后，须带请求头 `X-Booknest-Api-Key`。
 
 **请求体**
 
 ```json
 {
-  "field": "publisher",
-  "value": "重庆出版社",
-  "note": "根据实体书版权页修正"
+  "targetType": "edition",
+  "targetId": "abc123",
+  "fieldName": "publisher",
+  "oldValue": "旧出版社",
+  "newValue": "重庆出版社",
+  "note": "根据版权页"
 }
 ```
 
-**支持的 field**
+| 字段 | 说明 |
+|---|---|
+| `targetType` | `edition`（默认）或 `work` |
+| `targetId` | 对应表主键 |
+| `fieldName` | 要修正的字段名 |
+| `newValue` | 新值（必填） |
 
-- `title` / `subtitle` / `publisher` / `publishedDate`
-- `isbn10` / `isbn13`
-- `pageCount` / `language` / `description`
-- `coverUrl`
-
-**响应**
+**响应** `201`
 
 ```json
-{
-  "id": "correction_01HXYZ",
-  "status": "pending"
-}
+{ "id": "corr_01", "status": "pending" }
 ```
 
-修正默认进入 `pending`，待管理员审核或自动通过（取决于配置）。审核通过后才覆盖 `editions` 表对应字段。
+v0.1 仅写入 `corrections` 表，不自动改 `editions`/`works`。
 
-## 5. 触发重新聚合
+---
+
+## 5. Provider 状态
 
 ```http
-POST /api/books/{editionId}/refresh
+GET /api/providers
 ```
-
-清掉该 ISBN 的 `search_cache`、重新调用所有启用的 Provider 并合并。用于：
-
-- 上游数据更新后强制刷新
-- 用户报告字段不对，重新拉取再合并
-
-## 6. Provider 健康状态
-
-```http
-GET /api/providers/status
-```
-
-**响应**
 
 ```json
 {
@@ -172,42 +195,48 @@ GET /api/providers/status
     {
       "name": "open_library",
       "enabled": true,
-      "healthy": true,
+      "priority": 40,
       "circuitState": "closed",
-      "lastSuccessAt": "2026-05-18T10:00:00Z",
-      "lastErrorAt": null,
-      "rateLimit": { "limit": 60, "remaining": 58 }
-    },
-    {
-      "name": "google_books",
-      "enabled": true,
-      "healthy": true,
-      "circuitState": "closed",
-      "lastSuccessAt": "2026-05-18T10:01:00Z",
-      "lastErrorAt": "2026-05-18T09:45:23Z",
-      "rateLimit": { "limit": 60, "remaining": 60 }
+      "failureCount": 0,
+      "lastSuccessAt": "2026-05-19T12:00:00.000Z",
+      "lastErrorAt": null
     }
   ]
 }
 ```
 
-## 7. 健康检查
+---
+
+## 6. 健康检查
 
 ```http
 GET /healthz
 ```
 
-返回 `{"status": "ok"}`，用于容器健康检查 / 负载均衡探活。
+```json
+{ "status": "ok", "service": "booknest", "version": "0.1.0" }
+```
 
 ---
 
-## 错误码表
+## 路线图（尚未实现）
+
+以下端点在 design 文档中有描述，**v0.1 未提供**：
+
+- `POST /api/books/{editionId}/refresh` — 强制清缓存并重新聚合
+- `GET /api/providers/status` — 请使用 `GET /api/providers`
+
+---
+
+## 错误码
 
 | code | 说明 |
 |---|---|
-| `INVALID_ISBN` | ISBN 校验失败 |
-| `MISSING_QUERY` | 缺少 `q` 参数 |
-| `EDITION_NOT_FOUND` | Edition 不存在 |
-| `ALL_PROVIDERS_FAILED` | 所有启用的 Provider 都失败 |
-| `RATE_LIMITED` | 上游 Provider 限流 |
-| `INVALID_FIELD` | 修正字段不在白名单 |
+| `INVALID_ISBN` | ISBN 无效 |
+| `INVALID_QUERY` | 搜索参数无效 |
+| `NOT_FOUND` | Edition / Work 不存在 |
+| `INVALID_CORRECTION` | 修正请求体无效 |
+| `UNAUTHORIZED` | corrections API Key 错误 |
+| `RATE_LIMITED` | 限流 |
+| `PAYLOAD_TOO_LARGE` | 请求体超过 10KB |
+| `PROVIDER_*` | 上游 Provider 超时/HTTP 错误 |
