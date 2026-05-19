@@ -13,6 +13,7 @@ import { CommercialIsbnProvider } from '../providers/commercial-isbn/index.js';
 import { CrossrefProvider } from '../providers/crossref/index.js';
 import { GoogleBooksProvider } from '../providers/google-books/index.js';
 import { LOCProvider } from '../providers/loc/index.js';
+import { NeoDBProvider } from '../providers/neodb/index.js';
 import { OpenLibraryProvider } from '../providers/open-library/index.js';
 import { env } from './env.js';
 
@@ -82,6 +83,19 @@ export const providerConfigs: Record<string, ProviderConfig> = {
     cacheTtlDays: 90,
     timeoutMs: 8000,
   },
+  neodb: {
+    name: 'neodb',
+    enabled: env.ENABLE_NEODB,
+    priority: 45,
+    riskLevel: 'low',
+    supportsISBN: true,
+    supportsTitleSearch: true,
+    supportsAuthorSearch: true,
+    supportsCover: true,
+    rateLimitPerMinute: 30,
+    cacheTtlDays: 60,
+    timeoutMs: 8000,
+  },
 };
 
 const PROVIDER_FACTORIES: Record<string, () => BookProvider> = {
@@ -90,6 +104,7 @@ const PROVIDER_FACTORIES: Record<string, () => BookProvider> = {
   crossref: () => new CrossrefProvider(),
   loc: () => new LOCProvider(),
   commercial_isbn: () => new CommercialIsbnProvider(),
+  neodb: () => new NeoDBProvider(),
 };
 
 const instances = new Map<string, BookProvider>();

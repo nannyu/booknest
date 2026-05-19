@@ -35,6 +35,7 @@ const envSchema = z.object({
   ENABLE_CALIS: boolFromString.default('false'),
   ENABLE_PDC: boolFromString.default('false'),
   ENABLE_COMMERCIAL_ISBN: boolFromString.default('false'),
+  ENABLE_NEODB: boolFromString.default('false'),
 
   // Google Books
   GOOGLE_BOOKS_API_KEY: z.string().optional(),
@@ -43,6 +44,10 @@ const envSchema = z.object({
   COMMERCIAL_ISBN_PRESET: z.enum(['isbndb', 'api_ninjas']).default('isbndb'),
   COMMERCIAL_ISBN_API_KEY: z.string().optional(),
   COMMERCIAL_ISBN_API_URL: z.string().url().optional(),
+
+  // NeoDB（开源联邦图书目录，公开搜索 API 不需要 OAuth）
+  NEODB_INSTANCE_URL: z.string().url().default('https://neodb.social'),
+  NEODB_API_TOKEN: z.string().optional(),
 
   // App identity (polite usage)
   APP_USER_AGENT: z

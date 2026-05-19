@@ -135,6 +135,47 @@ GET https://www.loc.gov/books/?q={query}&fo=json
 
 ---
 
+## NeoDB（可选）
+
+| 项 | 值 |
+|---|---|
+| 数据来源 | `NEODB_INSTANCE_URL`（默认 https://neodb.social） |
+| 官方文档 | https://neodb.net/api/ |
+| 源码 | https://github.com/neodb-social/neodb（AGPL-3） |
+| 默认启用 | ❌ |
+| 实现状态 | ✅ 已实现 |
+| 是否需要 Key | 否（搜索 endpoint 公开，无需 OAuth） |
+| 允许缓存 | ✅ |
+| Cache TTL | 60 天 |
+| 建议频率 | ≤ 30 req/min（NeoDB 实例自维护，礼貌使用） |
+
+### 使用接口
+
+```text
+GET {NEODB_INSTANCE_URL}/api/catalog/search?query={q}&category=book&page=1
+```
+
+无认证；可选 `Authorization: Bearer {NEODB_API_TOKEN}` 走 polite pool 获得更高 rate limit（需在 NeoDB 实例注册 app 跑一次 OAuth）。
+
+### 适用场景
+
+- **中文图书简介**（核心价值）—— NeoDB 整合了多源（OpenLibrary、Wikidata、ActivityPub 联邦实例、用户众包）的中文元数据，简介质量通常优于 OL/GB
+- 中文 `publisher` 列表（OL/GB 通常只给英文/拼音版）
+- 中文 `translator` 信息
+- 当前 `description` 字段 FIELD_PRIORITY 已把 NeoDB 排在 OL/GB 之上
+
+### 已知限制
+
+- 数据**众包，质量无保证**（NeoDB 官方明示）
+- `neodb.social` 在部分网络环境不可达；可通过 `NEODB_INSTANCE_URL` 改指自托管或社区实例
+- AGPL-3 license：仅作为远程 API 调用合规；如要 fork / 嵌入 NeoDB 服务端代码需自查兼容性
+
+### 合规注意
+
+NeoDB 的元数据来源包含豆瓣等（用户驱动 import 行为），但 BookNest 调用的是 NeoDB 自身的合规 API，**不属于"BookNest 抓取豆瓣"**——类比 Open Library 也整合多源。
+
+---
+
 ## NLC OPAC / 中国国家图书馆（可选，**高风险**）
 
 | 项 | 值 |
