@@ -144,7 +144,7 @@ pnpm test --coverage
 
 **v0.1 已交付**：
 - ISBN / 书名 / **作者** / 作者+书名 四种查询
-- Provider：Open Library + Google Books 默认开；Crossref + LOC + 商业 ISBN (ISBNdb/API Ninjas) 可选
+- Provider：Open Library + Google Books 默认开；Crossref + LOC + NeoDB + 商业 ISBN (ISBNdb/API Ninjas) 可选
 - 完整持久化（works / editions / contributors / edition_sources / external_identifiers）
 - 详情页 `GET /api/books/:id` + 前端 hash 路由
 - 评分：queryType-aware + 多源共识 + 完整度

@@ -20,6 +20,7 @@ Provider Orchestrator (并发调用，超时/限流/熔断)
   ├─ Google Books       (默认开)
   ├─ Crossref           (可选)
   ├─ Library of Congress(可选)
+  ├─ NeoDB              (可选, 联邦图书目录, 公开搜索 API)
   ├─ Commercial ISBN    (可选, ISBNdb / API Ninjas / 自定义)
   └─ [未实现] NLC OPAC / CALIS / PDC / WorldCat
   ↓
@@ -59,6 +60,7 @@ apps/api/src/
 │   ├── google-books/       # 默认启用
 │   ├── crossref/           # 可选
 │   ├── loc/                # 可选
+│   ├── neodb/              # 可选；公开 /api/catalog/search，无需 OAuth
 │   └── commercial-isbn/    # 可选；presets.ts 内置 isbndb + api_ninjas
 ├── db/
 │   ├── schema.ts           # Drizzle schema
@@ -150,18 +152,18 @@ applyReturnPolicy (recommended / needsReview)
 
 ```ts
 const fieldPriority = {
-  isbn:          ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  title:         ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  authors:       ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  publisher:     ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  publishedDate: ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'crossref', 'loc'],
-  categories:    ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'open_library', 'google_books', 'crossref', 'loc'],
-  coverUrl:      ['commercial_isbn', 'google_books', 'open_library', 'loc'],
-  description:   ['commercial_isbn', 'google_books', 'open_library', 'crossref', 'loc'],
+  isbn:          ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'neodb', 'crossref', 'loc'],
+  title:         ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'google_books', 'open_library', 'neodb', 'crossref', 'loc'],
+  authors:       ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'neodb', 'google_books', 'open_library', 'crossref', 'loc'],
+  publisher:     ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'neodb', 'google_books', 'open_library', 'crossref', 'loc'],
+  publishedDate: ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'neodb', 'google_books', 'open_library', 'crossref', 'loc'],
+  categories:    ['commercial_isbn', 'pdc', 'nlc_opac', 'calis', 'neodb', 'open_library', 'google_books', 'crossref', 'loc'],
+  coverUrl:      ['commercial_isbn', 'google_books', 'open_library', 'neodb', 'loc'],
+  description:   ['commercial_isbn', 'neodb', 'google_books', 'open_library', 'crossref', 'loc'],
 };
 ```
 
-> **解读**：商业付费源最权威（用户付了钱）；中文增强源对中文字段（标题/作者/出版社）优先；封面/简介 Google Books 通常质量更高；Crossref/LOC 作为兜底。
+> **解读**：商业付费源最权威（用户付了钱）；中文增强源对中文字段（标题/作者/出版社）优先；**NeoDB 在 description 上排在 GB/OL 之前**——这是接入它的核心动机（中文简介覆盖更全）；中文 publisher/translator/categories 上 NeoDB 也优先于 OL/GB；title/isbn 仍以 OL/GB 为准（更权威）。Crossref/LOC 作为兜底。
 
 ## 7. 候选评分
 
@@ -218,7 +220,7 @@ clamp(0, 100)
 
 | 对象 | TTL | 说明 |
 |---|---:|---|
-| ISBN 精确查询 | per provider | Open Library 90 / Google Books 30 / Crossref 90 / LOC 90 |
+| ISBN 精确查询 | per provider | Open Library 90 / Google Books 30 / Crossref 90 / LOC 90 / NeoDB 60 |
 | 失败结果 | 1 天 | `FAILURE_CACHE_TTL_DAYS` |
 | 用户确认数据（持久化） | 永久 | 直接落 `editions` 表 |
 
@@ -232,6 +234,7 @@ sha256(`${provider}:${queryType}:${query}:${language ?? ''}`)
 
 ```text
 Open Library / Google Books / Crossref / LOC / Commercial ISBN: 60 req/min
+NeoDB:                                                            30 req/min（公开实例礼貌使用）
 NLC OPAC / CALIS:                                                 6 req/min（未实现）
 PDC:                                                              2 req/min 或仅手动（未实现）
 ```
